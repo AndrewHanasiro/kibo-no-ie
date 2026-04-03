@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "394140065481",
+    "project_id": "kibo-no-ie",
+    "storage_bucket": "kibo-no-ie.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394140065481:android:30fb94cd585e407213b718",
+        "android_client_info": {
+          "package_name": "com.example.kibo_no_ie"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN5VM7TV3Bpc0X-5NmkH0LCOK95KKIQhY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Função helper para verificar se o usuário está logado
+    function isAutenticado() {
+      return request.auth != null;
+    }
+
+    // Coleção 'products'
+    // Requisito: Todos os usuários logados podem ver, criar e modificar
+    match /products/{productId} {
+      allow read, create, update: if isAutenticado();
+      // (Opcional) Só permite deletar se for o dono:
+      // allow delete: if isAutenticado() && resource.data.criadoPor == request.auth.uid;
+    }
+
+    // Coleção 'alerts'
+    // Requisito: Todos os usuários logados podem criar alertas
+    match /alerts/{alertId} {
+      allow create: if isAutenticado();
+      
+      // Assumindo que também podem ver os alertas que criaram ou todos
+      allow read: if isAutenticado(); 
+      // allow read: if isAutenticado() && resource.data.criadoPor == request.auth.uid;
+    }
+  }
+}
