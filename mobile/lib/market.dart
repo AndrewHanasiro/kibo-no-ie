@@ -141,7 +141,7 @@ class _MarketState extends State<Market> {
                   ),
                 ),
                 child: Text(
-                  'Pedir no caixa: \$${_totalValue.toStringAsFixed(2)}',
+                  'Pedir no caixa: R\$${_totalValue.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
