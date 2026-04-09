@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useState, useMemo } from "react";
 import UpdateProductModal from "./_updateModal";
 import CreateProductModal from "./_createModal";
 import useProducts, { Product } from "@/hooks/product";
 
 export default function ProdutosPage() {
-  const { user, logout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const router = useRouter();
 
-  const { products, loading, refetch } = useProducts();
+  const { products, refetch } = useProducts();
 
   const list = useMemo(() => {
     return Object.groupBy(products, (product) => {
@@ -25,24 +21,6 @@ export default function ProdutosPage() {
   const categoryList = useMemo(() => {
     return new Set(products.map((product) => product.category));
   }, [products]);
-
-  useEffect(() => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    refetch();
-  }, [user, router, refetch]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -57,12 +35,6 @@ export default function ProdutosPage() {
             className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
           >
             + Novo Produto
-          </button>
-          <button
-            onClick={logout}
-            className="px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            Sair da Conta
           </button>
         </div>
       </header>

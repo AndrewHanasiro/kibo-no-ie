@@ -8,11 +8,12 @@ export default function Home() {
   const { user } = useAuth();
   const router = useRouter();
   useEffect(() => {
+    const currentUrl = window.location.pathname;
     if (!user) {
       router.push("/login");
       return;
     } else {
-      router.push("/produto");
+      router.push(currentUrl);
       return;
     }
   });

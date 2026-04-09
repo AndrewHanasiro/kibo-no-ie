@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   distDir: "dist",
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        port: "",
+        pathname: "/**", // This allows all buckets and files under the storage domain
+      },
+    ],
   },
 };
 
