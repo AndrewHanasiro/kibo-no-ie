@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kibo_no_ie/map.dart';
 import 'package:kibo_no_ie/market.dart';
@@ -16,7 +19,11 @@ class NavigationBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NavigationExample());
+    if (Platform.isIOS) {
+      return const CupertinoApp(home: NavigationExample());
+    } else {
+      return const MaterialApp(home: NavigationExample());
+    }
   }
 }
 

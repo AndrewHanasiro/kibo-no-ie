@@ -6,11 +6,14 @@ import { Product } from "@/hooks/product";
 
 type UpdateProductModalProps = {
   selectedProduct: Product;
+  categoryList: string[];
   setIsModalOpen: (b: boolean) => void;
   fetchProdutos: () => void;
 };
 
 export default function UpdateProductModal(props: UpdateProductModalProps) {
+  const [category, setCategory] = useState(props.selectedProduct.category);
+  const [name, setName] = useState(props.selectedProduct.name);
   const [price, setPrice] = useState(props.selectedProduct.price);
   const [isAvailable, setIsAvailable] = useState(
     props.selectedProduct.isAvailable,
@@ -31,6 +34,8 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
           },
           body: JSON.stringify({
             id: props.selectedProduct.id,
+            name: name,
+            category: category,
             price: price,
             isAvailable: isAvailable,
           }),
@@ -55,6 +60,34 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">
+              Categoria
+            </label>
+            <input
+              list="categories"
+              type="text"
+              className="w-full px-4 py-2 border border-gray-400 text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+            <datalist id="categories">
+              {props.categoryList.map((category) => (
+                <option key={category} value={category} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              Nome do produto
+            </label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 border border-gray-400 text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
               Preço (R$)
             </label>
             <input
@@ -73,7 +106,10 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
               checked={isAvailable}
               onChange={(e) => setIsAvailable(e.target.checked)}
             />
-            <label htmlFor="available" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="available"
+              className="text-sm font-medium text-gray-700"
+            >
               Disponível para venda
             </label>
           </div>

@@ -15,27 +15,34 @@ class Market extends StatefulWidget {
 class _MarketState extends State<Market> {
   // State variables
   late Future<List<Product>> _productList;
+  List<Product> _allProducts = []; // To store all fetched products
   double _totalValue = 0.0;
+  String _selectedCategory = 'All'; // Default to 'All'
+  List<String> _categories = [];
 
   @override
   void initState() {
     super.initState();
-    _productList = _fetchProducts();
+    _productList = _fetchProducts(); // This future will populate _allProducts and _categories
   }
 
-  // --- Data Fetching Function ---
   Future<List<Product>> _fetchProducts() async {
-    final response = await http.get(Uri.parse(mockApiUrl));
+    final response = await http.get(Uri.parse(mockApiUrl)); //
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList.map((json) => Product.fromJson(json)).toList();
+      final products = jsonList.map((json) => Product.fromJson(json)).toList(); //
+      if (mounted) {
+        setState(() {
+          _allProducts = products;
+          _categories = ['All'] + products.map((p) => p.category).toSet().toList();
+        });
+      }
+      return products;
     } else {
       throw Exception('Failed to load products');
     }
   }
-
-  // --- State Management Functions ---
 
   void _updateTotal(Product product, bool isAdding) {
     setState(() {
@@ -51,8 +58,6 @@ class _MarketState extends State<Market> {
       _totalValue = double.parse(_totalValue.toStringAsFixed(2));
     });
   }
-
-  // --- Widget Build ---
 
   @override
   Widget build(BuildContext context) {
@@ -72,17 +77,50 @@ class _MarketState extends State<Market> {
             return const Center(child: Text('Nenhum produto encontrado'));
           }
 
-          // Data successfully loaded
-          final products = snapshot.data!;
+          // Use _allProducts which is populated in _fetchProducts and filter it here
+          final displayedProducts = _selectedCategory == 'All'
+              ? _allProducts
+              : _allProducts.where((p) => p.category == _selectedCategory).toList();
 
           return Column(
             children: [
-              // 1. Product List
+              // Horizontal Category Bar
+              if (_categories.isNotEmpty)
+                Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _categories.length,
+                    itemBuilder: (context, index) {
+                      final category = _categories[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ChoiceChip(
+                          label: Text(category),
+                          selected: _selectedCategory == category,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() {
+                                _selectedCategory = category;
+                              });
+                            }
+                          },
+                          selectedColor: Colors.blueGrey.shade700,
+                          labelStyle: TextStyle(
+                            color: _selectedCategory == category ? Colors.white : Colors.black,
+                          ),
+                          backgroundColor: Colors.blueGrey.shade100,
+                        ),
+                      );
+                    },
+                  ),
+                ),
               Expanded(
                 child: ListView.builder(
-                  itemCount: products.length,
+                  itemCount: displayedProducts.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
+                    final product = displayedProducts[index];
                     return ProductItemTile(
                       product: product,
                       onAdd: () => _updateTotal(product, true),
@@ -92,7 +130,6 @@ class _MarketState extends State<Market> {
                 ),
               ),
 
-              // 2. Total Value Display (Fixed at the bottom)
               Container(
                 padding: const EdgeInsets.all(16.0),
                 width: double.infinity,

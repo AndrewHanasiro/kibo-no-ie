@@ -15,6 +15,7 @@ type Product = {
   name: string;
   price: number;
   isAvailable: boolean;
+  category: string;
 };
 
 /**
@@ -52,6 +53,7 @@ export const listProducts = onRequest({ cors: true }, async (request, response) 
       name: data[id].name,
       price: data[id].price,
       isAvailable: data[id].isAvailable,
+      category: data[id].category,
     }));
     response.status(200).json(products);
   } catch (error) {
@@ -75,7 +77,7 @@ export const updateProduct = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { id, price, isAvailable } = request.body;
+  const { id, name, price, isAvailable, category } = request.body;
   if (!id) {
     response.status(400).send("Product ID is required");
     return;
@@ -84,6 +86,8 @@ export const updateProduct = onRequest({ cors: true }, async (request, response)
     const updates: Partial<Product> = {};
     if (price !== undefined) updates.price = price;
     if (isAvailable !== undefined) updates.isAvailable = isAvailable;
+    if (name !== undefined) updates.name = name;
+    if (category !== undefined) updates.category = category;
     await db.ref(`products/${id}`).update(updates);
     response.status(200).send(`Product ${id} updated successfully`);
   } catch (error) {
@@ -107,11 +111,11 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { name, price, isAvailable } = request.body;
-  if (!name || price === undefined || isAvailable === undefined) {
+  const { name, price, isAvailable, category } = request.body;
+  if (!name || price === undefined || isAvailable === undefined || !category) {
     response
       .status(400)
-      .send("Missing required fields: name, price, or isAvailable");
+      .send("Missing required fields: name, price, isAvailable, or category");
     return;
   }
   try {
@@ -121,6 +125,7 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
       name,
       price,
       isAvailable,
+      category,
       createdAt: new Date().toISOString(), // Optional: track when it was created
     });
     response.status(201).json({
