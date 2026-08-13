@@ -7,10 +7,11 @@ import Image from "next/image";
 
 const containerStyle = {
   width: "100%",
-  height: "400px",
+  height: "300px",
+  borderRadius: "0.75rem",
 };
 
-const defaultCenter = { lat: -23.435119625012014, lng: -46.35803342659766 }; // Default to São Paulo
+const defaultCenter = { lat: -23.435119625012014, lng: -46.35803342659766 }; // Kibô-no-Iê
 
 type CreateShopModalProps = {
   setIsModalOpen: (b: boolean) => void;
@@ -22,10 +23,11 @@ export default function CreateShopModal(props: CreateShopModalProps) {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [image, setImage] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!, // Replace with your actual API Key
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
   });
 
   const [_, setMap] = useState<google.maps.Map | null>(null);
@@ -43,6 +45,7 @@ export default function CreateShopModal(props: CreateShopModalProps) {
 
   const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const token = await auth.currentUser?.getIdToken();
@@ -69,6 +72,8 @@ export default function CreateShopModal(props: CreateShopModalProps) {
       }
     } catch (error) {
       console.error("Creation failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -88,54 +93,75 @@ export default function CreateShopModal(props: CreateShopModalProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">Nova Loja</h3>
+    <div className="fixed inset-0 bg-[#1b261d]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh] border border-[#e1ebe0]">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">✨</span>
+            <h3 className="text-xl font-bold text-[#1b261d]">
+              Nova Barraca / Loja
+            </h3>
+          </div>
+          <button
+            onClick={() => props.setIsModalOpen(false)}
+            className="w-8 h-8 rounded-full bg-[#f5f8f2] hover:bg-[#e1ebe0] text-[#566755] flex items-center justify-center transition-colors cursor-pointer text-sm font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
-              Nome da loja
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
+              Nome da Barraca / Loja
             </label>
             <input
               type="text"
               required
-              className="w-full px-4 py-2 border border-gray-400 text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+              placeholder="Ex: Barraca do Yakisoba, Floricultura"
+              className="w-full px-4 py-2.5 bg-[#f8faf7] border border-[#d2dfd0] text-[#1b261d] rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8cb83e] focus:border-[#1e4d2b] outline-none text-sm"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
-              Imagem da loja
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
+              Foto da Barraca
             </label>
             <input
               type="file"
               accept="image/*"
               required
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+              className="w-full text-xs text-[#566755] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#eff7e1] file:text-[#1e4d2b] hover:file:bg-[#8cb83e]/20 cursor-pointer"
               onChange={handleImageChange}
             />
             {image && (
-              <div className="mt-2">
-                <p className="text-xs text-gray-500 mb-1">Prévia:</p>
-                <Image
-                  src={image}
-                  alt="Preview"
-                  width={128}
-                  height={128}
-                  className="object-cover rounded-lg border border-gray-200"
-                  unoptimized
-                />
+              <div className="mt-3">
+                <p className="text-[11px] text-[#7b8e79] mb-1 font-medium">Prévia da imagem:</p>
+                <div className="relative w-32 h-32 rounded-2xl overflow-hidden border border-[#e1ebe0] shadow-sm">
+                  <Image
+                    src={image}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               </div>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Localização (Clique no mapa)
-            </label>
-            <div className="rounded-lg overflow-hidden border border-gray-300">
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d]">
+                Localização no Mapa
+              </label>
+              <span className="text-[11px] text-[#8cb83e] font-bold">
+                (Clique no mapa para marcar)
+              </span>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-[#d2dfd0] shadow-inner">
               {isLoaded ? (
                 <GoogleMap
                   mapContainerStyle={containerStyle}
@@ -144,20 +170,25 @@ export default function CreateShopModal(props: CreateShopModalProps) {
                   onLoad={onLoad}
                   onUnmount={onUnmount}
                   onClick={onMapClick}
+                  options={{
+                    streetViewControl: false,
+                    mapTypeControl: true,
+                  }}
                 >
                   {lat !== null && lng !== null && (
                     <MarkerF position={{ lat, lng }} />
                   )}
                 </GoogleMap>
               ) : (
-                <div className="h-[250px] bg-gray-100 flex items-center justify-center text-gray-400">
+                <div className="h-[250px] bg-[#f8faf7] flex items-center justify-center text-[#566755] text-sm">
                   Carregando mapa...
                 </div>
               )}
             </div>
             {lat && (
-              <p className="mt-2 text-xs text-gray-500">
-                Coordenadas: {lat.toFixed(6)}, {lng?.toFixed(6)}
+              <p className="mt-2 text-xs text-[#7b8e79] flex items-center gap-1 font-medium">
+                <span>📍 Coordenadas:</span>
+                <span className="font-bold text-[#1e4d2b]">{lat.toFixed(6)}, {lng?.toFixed(6)}</span>
               </p>
             )}
           </div>
@@ -165,14 +196,19 @@ export default function CreateShopModal(props: CreateShopModalProps) {
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 bg-[#1e4d2b] hover:bg-[#163d21] text-white py-3 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer text-sm"
             >
-              Criar
+              {isSubmitting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : (
+                "Criar Barraca"
+              )}
             </button>
             <button
               type="button"
               onClick={() => props.setIsModalOpen(false)}
-              className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              className="flex-1 bg-[#f5f8f2] text-[#566755] hover:bg-[#e1ebe0] py-3 rounded-xl font-bold transition-colors cursor-pointer text-sm border border-[#d2dfd0]"
             >
               Cancelar
             </button>
@@ -182,3 +218,4 @@ export default function CreateShopModal(props: CreateShopModalProps) {
     </div>
   );
 }
+

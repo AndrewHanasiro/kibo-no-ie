@@ -9,93 +9,174 @@ export default function ProdutosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("ALL");
 
-  const { products, refetch } = useProducts();
-
-  const list = useMemo(() => {
-    return Object.groupBy(products, (product) => {
-      return product.category;
-    });
-  }, [products]);
+  const { products, loading, refetch } = useProducts();
 
   const categoryList = useMemo(() => {
-    return new Set(products.map((product) => product.category));
+    return Array.from(new Set(products.map((product) => product.category)));
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (activeCategoryFilter === "ALL") return products;
+    return products.filter((p) => p.category === activeCategoryFilter);
+  }, [products, activeCategoryFilter]);
+
+  const groupedList = useMemo(() => {
+    return Object.groupBy(filteredProducts, (product) => product.category);
+  }, [filteredProducts]);
+
+  const totalAvailable = useMemo(() => {
+    return products.filter((p) => p.isAvailable).length;
   }, [products]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <header className="max-w-4xl mx-auto flex justify-between items-end mb-8">
+    <div className="space-y-8">
+      {/* Header Banner */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#e1ebe0] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Produtos</h1>
-          <p className="text-gray-600">Gerencie o catálogo de itens</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xl">🍱</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1b261d]">
+              Catálogo de Produtos
+            </h1>
+          </div>
+          <p className="text-sm text-[#566755]">
+            45ª Festa do Verde — Gerenciamento de itens, valores e estoque para os caixas
+          </p>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-[#f5f8f2] border border-[#e1ebe0] rounded-2xl">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8cb83e]" />
+            <span className="text-xs font-bold text-[#1e4d2b]">
+              {totalAvailable} / {products.length} Disponíveis
+            </span>
+          </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-3 bg-[#1e4d2b] hover:bg-[#163d21] text-white font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
-            + Novo Produto
+            <span>+</span>
+            <span>Novo Produto</span>
           </button>
         </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto space-y-10">
-        {Object.entries(list).map(([category, categoryProducts]) => (
-          <section key={category} className="space-y-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-bold text-gray-800 whitespace-nowrap">
-                {category}
-              </h2>
-              <div className="h-px bg-gray-200 w-full" />
-            </div>
-            <div className="grid gap-4">
-              {categoryProducts?.map((p) => (
-                <div
-                  key={p.id}
-                  className="p-6 border border-gray-100 rounded-xl flex justify-between items-center bg-white shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <div>
-                    <p className="text-lg font-bold text-gray-900">{p.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {p.isAvailable ? (
-                        <span className="text-green-600 font-medium">
-                          ● Disponível
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 font-medium">
-                          ○ Indisponível
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl font-bold text-blue-600">
-                      R$ {p.price.toFixed(2)}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setSelectedProduct(p);
-                        setIsModalOpen(true);
-                      }}
-                      className="px-4 py-2 text-sm font-semibold bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
       </div>
 
-      <div className="max-w-4xl mx-auto mt-12 mb-8 flex justify-center">
+      {/* Category Filter Pills */}
+      {categoryList.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <button
+            onClick={() => setActiveCategoryFilter("ALL")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeCategoryFilter === "ALL"
+                ? "bg-[#1e4d2b] text-white shadow-sm"
+                : "bg-white text-[#566755] hover:bg-[#eff7e1] border border-[#e1ebe0]"
+            }`}
+          >
+            Todos ({products.length})
+          </button>
+          {categoryList.map((cat) => {
+            const count = products.filter((p) => p.category === cat).length;
+            const isActive = activeCategoryFilter === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategoryFilter(cat)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? "bg-[#8cb83e] text-[#13301a] shadow-sm"
+                    : "bg-white text-[#566755] hover:bg-[#eff7e1] border border-[#e1ebe0]"
+                }`}
+              >
+                {cat} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Loading state */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#8cb83e] border-t-transparent"></div>
+          <p className="text-sm font-medium text-[#566755]">Carregando catálogo...</p>
+        </div>
+      )}
+
+      {/* Products Groups */}
+      {!loading && (
+        <div className="space-y-8">
+          {Object.entries(groupedList).map(([category, categoryProducts]) => (
+            <section key={category} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 bg-[#eff7e1] text-[#1e4d2b] font-extrabold text-sm rounded-xl border border-[#8cb83e]/30">
+                  {category}
+                </span>
+                <div className="h-px bg-[#e1ebe0] flex-1" />
+                <span className="text-xs text-[#7b8e79] font-medium">
+                  {categoryProducts?.length} {categoryProducts?.length === 1 ? "item" : "itens"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {categoryProducts?.map((p) => (
+                  <div
+                    key={p.id}
+                    className="p-5 bg-white border border-[#e1ebe0] rounded-2xl shadow-sm hover:shadow-md transition-all flex justify-between items-center group hover:border-[#8cb83e]/50"
+                  >
+                    <div className="space-y-1.5 pr-3">
+                      <p className="text-base font-bold text-[#1b261d] group-hover:text-[#1e4d2b] transition-colors">
+                        {p.name}
+                      </p>
+                      <div>
+                        {p.isAvailable ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#eaf5dd] text-[#36681d]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#5fa824]" />
+                            Disponível
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#f3f4f6] text-[#6b7280]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#9ca3af]" />
+                            Esgotado
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className="block text-xs text-[#7b8e79] font-medium">Preço</span>
+                        <span className="text-lg font-extrabold text-[#1e4d2b]">
+                          R$ {p.price.toFixed(2)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(p);
+                          setIsModalOpen(true);
+                        }}
+                        className="px-3.5 py-2 text-xs font-bold bg-[#f5f8f2] hover:bg-[#8cb83e] text-[#1e4d2b] hover:text-[#13301a] border border-[#d2dfd0] rounded-xl transition-all shadow-sm cursor-pointer"
+                      >
+                        Editar ✏️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
+      {/* Floating Add Button for Bottom of Page */}
+      <div className="flex justify-center pt-4 pb-8">
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-bold rounded-2xl border-2 border-blue-600 hover:bg-blue-50 transition-all shadow-sm"
+          className="flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-[#1e4d2b] text-[#1e4d2b] hover:bg-[#eff7e1] font-bold rounded-2xl transition-all shadow-sm hover:shadow cursor-pointer"
         >
-          <span className="text-2xl">+</span>
-          Adicionar Novo Produto
+          <span className="text-xl">+</span>
+          <span>Adicionar Outro Produto</span>
         </button>
       </div>
 
@@ -104,7 +185,7 @@ export default function ProdutosPage() {
           selectedProduct={selectedProduct}
           setIsModalOpen={setIsModalOpen}
           fetchProdutos={refetch}
-          categoryList={Array.from(categoryList)}
+          categoryList={categoryList}
         />
       )}
 
@@ -112,9 +193,10 @@ export default function ProdutosPage() {
         <CreateProductModal
           setIsModalOpen={setIsCreateModalOpen}
           fetchProdutos={refetch}
-          categoryList={Array.from(categoryList)}
+          categoryList={categoryList}
         />
       )}
     </div>
   );
 }
+

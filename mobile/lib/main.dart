@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kibo_no_ie/map.dart';
+
 import 'package:kibo_no_ie/market.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:kibo_no_ie/warning.dart';
@@ -19,10 +19,72 @@ class NavigationBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Custom Festa do Verde Theme
+    final themeData = ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF1E4D2B), // Forest Green
+        primary: const Color(0xFF1E4D2B),
+        onPrimary: Colors.white,
+        secondary: const Color(0xFF8CB83E), // Leaf Green
+        onSecondary: const Color(0xFF13301A),
+        surface: const Color(0xFFFAFBF8),
+        onSurface: const Color(0xFF1B261D),
+      ),
+      scaffoldBackgroundColor: const Color(0xFFF5F8F2),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF1E4D2B),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.2,
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        elevation: 8,
+        indicatorColor: const Color(0xFF8CB83E).withValues(alpha: 0.3),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E4D2B),
+            );
+          }
+          return const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF566755),
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: Color(0xFF1E4D2B), size: 24);
+          }
+          return const IconThemeData(color: Color(0xFF566755), size: 24);
+        }),
+      ),
+    );
+
     if (Platform.isIOS) {
-      return const CupertinoApp(home: NavigationExample());
+      return MaterialApp(
+        title: 'Kibô-no-Iê — 45ª Festa do Verde',
+        theme: themeData,
+        debugShowCheckedModeBanner: false,
+        home: const NavigationExample(),
+      );
     } else {
-      return const MaterialApp(home: NavigationExample());
+      return MaterialApp(
+        title: 'Kibô-no-Iê — 45ª Festa do Verde',
+        theme: themeData,
+        debugShowCheckedModeBanner: false,
+        home: const NavigationExample(),
+      );
     }
   }
 }
@@ -35,38 +97,53 @@ class NavigationExample extends StatefulWidget {
 }
 
 class _NavigationExampleState extends State<NavigationExample> {
-  int currentPageIndex = 0;
+  int currentPageIndex = 1; // Default to Market (Food/Drinks) for quick guest ordering
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
-        indicatorColor: const Color.fromARGB(179, 3, 173, 3),
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.map_outlined),
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.food_bank_outlined),
-            icon: Icon(Icons.food_bank),
-            label: 'Comidas',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.campaign_outlined),
-            icon: Icon(Icons.campaign),
-            label: 'Avisos',
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          selectedIndex: currentPageIndex,
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.map),
+              icon: Icon(Icons.map_outlined),
+              label: 'Mapa',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.restaurant_menu),
+              icon: Icon(Icons.restaurant_menu_outlined),
+              label: 'Comidas',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.campaign),
+              icon: Icon(Icons.campaign_outlined),
+              label: 'Avisos',
+            ),
+          ],
+        ),
       ),
-      body: <Widget>[Map(), Market(), WarningBoard()][currentPageIndex],
+      body: <Widget>[
+        const Map(),
+        const Market(),
+        const WarningBoard(),
+      ][currentPageIndex],
     );
   }
 }
+

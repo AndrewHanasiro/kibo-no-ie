@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary-forest: #1e4d2b;
+  --primary-forest-hover: #163d21;
+  --secondary-leaf: #8cb83e;
+  --secondary-leaf-hover: #7ba832;
+  --secondary-leaf-light: #eff7e1;
+  --accent-gold: #c5a059;
+  --accent-red: #d32f2f;
+  --kibo-dark: #1b261d;
+  --kibo-text-muted: #566755;
+  --kibo-bg: #f5f8f2;
+  --kibo-card: #ffffff;
+  --kibo-border: #e1ebe0;
+
+  --background: var(--kibo-bg);
+  --foreground: var(--kibo-dark);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary-forest: var(--primary-forest);
+  --color-primary-forest-hover: var(--primary-forest-hover);
+  --color-secondary-leaf: var(--secondary-leaf);
+  --color-secondary-leaf-hover: var(--secondary-leaf-hover);
+  --color-secondary-leaf-light: var(--secondary-leaf-light);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-red: var(--accent-red);
+  --color-kibo-dark: var(--kibo-dark);
+  --color-kibo-text-muted: var(--kibo-text-muted);
+  --color-kibo-bg: var(--kibo-bg);
+  --color-kibo-card: var(--kibo-card);
+  --color-kibo-border: var(--kibo-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--kibo-bg);
+  color: var(--kibo-dark);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5ee;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c3d9bc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8cb83e;
+}
+
