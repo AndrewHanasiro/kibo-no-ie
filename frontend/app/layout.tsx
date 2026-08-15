@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kibô-no-Iê — 45ª Festa do Verde | Painel de Gestão",
+  title: "Kibô-no-Iê — 46ª Festa do Verde | Painel de Gestão",
   description:
     "Sistema de Gestão e Administração de Produtos, Lojas e Evento da Sociedade Beneficente Kibô-no-Iê.",
 };

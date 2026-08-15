@@ -50,7 +50,7 @@ export default function CreateShopModal(props: CreateShopModalProps) {
     try {
       const token = await auth.currentUser?.getIdToken();
       const response = await fetch(
-        `https://createshop-veumhwpskq-uc.a.run.app`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/createShop`,
         {
           method: "POST",
           headers: {

@@ -10,6 +10,7 @@ type Product = {
   price: number;
   isAvailable: boolean;
   category: string;
+  shopId?: string;
 };
 
 /**
@@ -30,6 +31,7 @@ export const listProducts = onRequest({ cors: true }, async (request, response) 
       price: data[id].price,
       isAvailable: data[id].isAvailable,
       category: data[id].category,
+      shopId: data[id].shopId,
     }));
     response.status(200).json(products);
   } catch (error) {
@@ -53,7 +55,7 @@ export const updateProduct = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { id, name, price, isAvailable, category } = request.body;
+  const { id, name, price, isAvailable, category, shopId } = request.body;
   if (!id) {
     response.status(400).send("Product ID is required");
     return;
@@ -64,6 +66,7 @@ export const updateProduct = onRequest({ cors: true }, async (request, response)
     if (isAvailable !== undefined) updates.isAvailable = isAvailable;
     if (name !== undefined) updates.name = name;
     if (category !== undefined) updates.category = category;
+    if (shopId !== undefined) updates.shopId = shopId;
     await db.ref(`products/${id}`).update(updates);
     response.status(200).send(`Product ${id} updated successfully`);
   } catch (error) {
@@ -87,7 +90,7 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { name, price, isAvailable, category } = request.body;
+  const { name, price, isAvailable, category, shopId } = request.body;
   if (!name || price === undefined || isAvailable === undefined || !category) {
     response
       .status(400)
@@ -102,6 +105,7 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
       price,
       isAvailable,
       category,
+      shopId: shopId || null,
       createdAt: new Date().toISOString(), // Optional: track when it was created
     });
     response.status(201).json({

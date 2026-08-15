@@ -10,6 +10,7 @@ export default function ProdutosPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { products, loading, refetch } = useProducts();
 
@@ -18,9 +19,16 @@ export default function ProdutosPage() {
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    if (activeCategoryFilter === "ALL") return products;
-    return products.filter((p) => p.category === activeCategoryFilter);
-  }, [products, activeCategoryFilter]);
+    let result = products;
+    if (activeCategoryFilter !== "ALL") {
+      result = result.filter((p) => p.category === activeCategoryFilter);
+    }
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter((p) => p.name.toLowerCase().includes(lowerQuery));
+    }
+    return result;
+  }, [products, activeCategoryFilter, searchQuery]);
 
   const groupedList = useMemo(() => {
     return Object.groupBy(filteredProducts, (product) => product.category);
@@ -42,7 +50,7 @@ export default function ProdutosPage() {
             </h1>
           </div>
           <p className="text-sm text-[#566755]">
-            45ª Festa do Verde — Gerenciamento de itens, valores e estoque para os caixas
+            46ª Festa do Verde — Gerenciamento de itens, valores e estoque para os caixas
           </p>
         </div>
 
@@ -63,16 +71,29 @@ export default function ProdutosPage() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <span className="text-[#566755] text-sm">🔍</span>
+        </div>
+        <input
+          type="text"
+          placeholder="Buscar produto pelo nome..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 border border-[#e1ebe0] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#8cb83e] bg-white text-sm shadow-sm transition-all text-[#1b261d] placeholder:text-[#7b8e79]"
+        />
+      </div>
+
       {/* Category Filter Pills */}
       {categoryList.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => setActiveCategoryFilter("ALL")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeCategoryFilter === "ALL"
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeCategoryFilter === "ALL"
                 ? "bg-[#1e4d2b] text-white shadow-sm"
                 : "bg-white text-[#566755] hover:bg-[#eff7e1] border border-[#e1ebe0]"
-            }`}
+              }`}
           >
             Todos ({products.length})
           </button>
@@ -83,11 +104,10 @@ export default function ProdutosPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategoryFilter(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${isActive
                     ? "bg-[#8cb83e] text-[#13301a] shadow-sm"
                     : "bg-white text-[#566755] hover:bg-[#eff7e1] border border-[#e1ebe0]"
-                }`}
+                  }`}
               >
                 {cat} ({count})
               </button>

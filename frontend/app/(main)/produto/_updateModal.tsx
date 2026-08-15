@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { auth } from "../../../lib/firebase";
 import { Product } from "@/hooks/product";
-
+import useShops from "@/hooks/shop";
 type UpdateProductModalProps = {
   selectedProduct: Product;
   categoryList: string[];
@@ -18,7 +18,9 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
   const [isAvailable, setIsAvailable] = useState(
     props.selectedProduct.isAvailable,
   );
+  const [shopId, setShopId] = useState(props.selectedProduct.shopId || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { shops } = useShops();
 
   const handleUpdate = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
     try {
       const token = await auth.currentUser?.getIdToken();
       const response = await fetch(
-        `https://updateproduct-veumhwpskq-uc.a.run.app`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/updateProduct`,
         {
           method: "POST",
           headers: {
@@ -40,6 +42,7 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
             category: category,
             price: price,
             isAvailable: isAvailable,
+            shopId: shopId || null,
           }),
         },
       );
@@ -76,6 +79,24 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
+              Barraca (Opcional)
+            </label>
+            <select
+              className="w-full px-4 py-2.5 bg-[#f8faf7] border border-[#d2dfd0] text-[#1b261d] rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8cb83e] focus:border-[#1e4d2b] outline-none text-sm"
+              value={shopId}
+              onChange={(e) => setShopId(e.target.value)}
+            >
+              <option value="">Selecione uma barraca</option>
+              {shops?.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
               Categoria
             </label>
             <input
@@ -91,6 +112,21 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
                 <option key={category} value={category} />
               ))}
             </datalist>
+
+            {props.categoryList.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {props.categoryList.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className="px-2.5 py-1 text-xs font-medium bg-[#e1ebe0] text-[#1e4d2b] rounded-lg hover:bg-[#8cb83e] hover:text-[#13301a] transition-colors cursor-pointer"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>

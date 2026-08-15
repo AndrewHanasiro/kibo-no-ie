@@ -18,7 +18,7 @@ const useShops = () => {
     setError(null);
 
     try {
-      const response = await fetch(`https://listshop-veumhwpskq-uc.a.run.app`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/listShop`);
       if (!response.ok) {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }

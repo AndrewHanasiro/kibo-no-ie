@@ -54,7 +54,7 @@ const LoginPage = () => {
             <span className="text-3xl">🌳</span>
           </div>
           <span className="inline-block px-3 py-1 bg-[#8cb83e]/20 text-[#1e4d2b] font-bold text-xs rounded-full uppercase tracking-wider mb-2">
-            45ª Festa do Verde
+            46ª Festa do Verde
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1b261d] tracking-tight">
             Kibô-no-Iê

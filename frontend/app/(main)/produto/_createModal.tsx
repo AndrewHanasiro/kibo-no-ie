@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { auth } from "../../../lib/firebase";
+import useShops from "@/hooks/shop";
 
 type CreateProductModalProps = {
   categoryList: string[];
@@ -13,7 +14,9 @@ export default function CreateProductModal(props: CreateProductModalProps) {
   const [category, setCategory] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
+  const [shopId, setShopId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { shops } = useShops();
 
   const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -22,7 +25,7 @@ export default function CreateProductModal(props: CreateProductModalProps) {
     try {
       const token = await auth.currentUser?.getIdToken();
       const response = await fetch(
-        `https://createproduct-veumhwpskq-uc.a.run.app`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/createProduct`,
         {
           method: "POST",
           headers: {
@@ -34,6 +37,7 @@ export default function CreateProductModal(props: CreateProductModalProps) {
             category: category,
             price: price,
             isAvailable: true,
+            shopId: shopId || undefined,
           }),
         },
       );
@@ -70,6 +74,24 @@ export default function CreateProductModal(props: CreateProductModalProps) {
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
+              Barraca (Opcional)
+            </label>
+            <select
+              className="w-full px-4 py-2.5 bg-[#f8faf7] border border-[#d2dfd0] text-[#1b261d] rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8cb83e] focus:border-[#1e4d2b] outline-none text-sm"
+              value={shopId}
+              onChange={(e) => setShopId(e.target.value)}
+            >
+              <option value="">Selecione uma barraca</option>
+              {shops?.map((shop) => (
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d] mb-1.5">
               Categoria
             </label>
             <input
@@ -86,6 +108,21 @@ export default function CreateProductModal(props: CreateProductModalProps) {
                 <option key={cat} value={cat} />
               ))}
             </datalist>
+            
+            {props.categoryList.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {props.categoryList.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className="px-2.5 py-1 text-xs font-medium bg-[#e1ebe0] text-[#1e4d2b] rounded-lg hover:bg-[#8cb83e] hover:text-[#13301a] transition-colors cursor-pointer"
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>

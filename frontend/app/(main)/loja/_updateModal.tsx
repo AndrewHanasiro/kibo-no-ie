@@ -56,7 +56,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
     try {
       const token = await auth.currentUser?.getIdToken();
       const response = await fetch(
-        `https://updateshop-veumhwpskq-uc.a.run.app`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/updateShop`,
         {
           method: "POST",
           headers: {

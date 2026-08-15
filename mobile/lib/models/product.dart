@@ -3,6 +3,7 @@ class Product {
   final String name;
   final double price;
   final String category;
+  final String? shopId;
 
   final bool isAvailable;
   int quantity;
@@ -13,6 +14,7 @@ class Product {
     required this.price,
     required this.category,
     required this.isAvailable,
+    this.shopId,
     this.quantity = 0,
   });
 
@@ -23,6 +25,7 @@ class Product {
       price: (json['price'] as num).toDouble(),
       category: json['category'] as String,
       isAvailable: json['isAvailable'] as bool,
+      shopId: json['shopId'] as String?,
     );
   }
 }

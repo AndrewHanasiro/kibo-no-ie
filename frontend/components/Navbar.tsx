@@ -30,7 +30,7 @@ export default function Navbar() {
                   Kibô-no-Iê
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-[#8cb83e] text-[#1e4d2b] px-1.5 py-0.5 rounded-full">
-                  45ª Festa
+                  46ª Festa
                 </span>
               </div>
               <p className="text-[11px] text-[#c5e1b8] leading-none hidden sm:block">
@@ -47,11 +47,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
-                    isActive
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${isActive
                       ? "bg-[#8cb83e] text-[#13301a] shadow-sm font-bold"
                       : "text-[#d8ebd2] hover:bg-[#285d37] hover:text-white"
-                  }`}
+                    }`}
                 >
                   <span className="text-sm">{link.icon}</span>
                   <span>{link.name}</span>

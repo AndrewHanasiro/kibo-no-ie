@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'models/warning.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const String apiUrl = 'https://listwarning-veumhwpskq-uc.a.run.app';
+final String apiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listWarning' : 'https://listwarning-veumhwpskq-uc.a.run.app';
 
 class WarningBoard extends StatefulWidget {
   const WarningBoard({super.key});

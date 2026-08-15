@@ -25,7 +25,7 @@ export default function LojasPage() {
             </h1>
           </div>
           <p className="text-sm text-[#566755]">
-            45ª Festa do Verde — Gerenciamento de pontos de venda, geolocalização e fotos
+            46ª Festa do Verde — Gerenciamento de pontos de venda, geolocalização e fotos
           </p>
         </div>
 

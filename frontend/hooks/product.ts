@@ -6,6 +6,7 @@ export type Product = {
   price: number;
   category: string;
   isAvailable: boolean;
+  shopId?: string;
 };
 
 const useProducts = () => {
@@ -19,7 +20,7 @@ const useProducts = () => {
 
     try {
       const response = await fetch(
-        `https://listproducts-veumhwpskq-uc.a.run.app`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listProducts`,
       );
 
       if (!response.ok) {

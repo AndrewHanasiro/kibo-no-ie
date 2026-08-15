@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'models/product.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const String mockApiUrl = 'https://listproducts-veumhwpskq-uc.a.run.app';
+final String mockApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listProducts' : 'https://listproducts-veumhwpskq-uc.a.run.app';
 
 class Market extends StatefulWidget {
   const Market({super.key});
@@ -82,7 +83,7 @@ class _MarketState extends State<Market> {
             ),
             const SizedBox(width: 8),
             const Text(
-              '45ª Festa do Verde',
+              '46ª Festa do Verde',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

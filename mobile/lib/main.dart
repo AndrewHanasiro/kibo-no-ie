@@ -6,10 +6,12 @@ import 'package:kibo_no_ie/map.dart';
 import 'package:kibo_no_ie/market.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:kibo_no_ie/warning.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const NavigationBarApp());
 }
@@ -73,14 +75,14 @@ class NavigationBarApp extends StatelessWidget {
 
     if (Platform.isIOS) {
       return MaterialApp(
-        title: 'Kibô-no-Iê — 45ª Festa do Verde',
+        title: 'Kibô-no-Iê — 46ª Festa do Verde',
         theme: themeData,
         debugShowCheckedModeBanner: false,
         home: const NavigationExample(),
       );
     } else {
       return MaterialApp(
-        title: 'Kibô-no-Iê — 45ª Festa do Verde',
+        title: 'Kibô-no-Iê — 46ª Festa do Verde',
         theme: themeData,
         debugShowCheckedModeBanner: false,
         home: const NavigationExample(),

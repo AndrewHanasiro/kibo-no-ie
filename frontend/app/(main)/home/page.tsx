@@ -48,7 +48,7 @@ export default function HomePage() {
             </h1>
           </div>
           <p className="text-sm text-[#566755]">
-            45ª Festa do Verde — Visualização geográfica das barracas e pontos de atendimento
+            46ª Festa do Verde — Visualização geográfica das barracas e pontos de atendimento
           </p>
         </div>
 
