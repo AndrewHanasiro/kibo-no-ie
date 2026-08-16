@@ -20,7 +20,7 @@ frontend:
 # pois o Flutter precisa de interação (como 'r' para hot reload)
 mobile:
 	@echo "📱 Iniciando o App Mobile..."
-	cd mobile && flutter run
+	cd mobile && flutter emulators --launch android_12 && flutter run
 
 # Atalho para executar o script de deploy completo
 deploy:

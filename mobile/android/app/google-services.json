@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "394140065481",
+    "firebase_url": "https://kibo-no-ie-default-rtdb.firebaseio.com",
     "project_id": "kibo-no-ie",
     "storage_bucket": "kibo-no-ie.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.example.kibo_no_ie"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "394140065481-r1r61veb9r528mvuvao31lls43odn5le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBN5VM7TV3Bpc0X-5NmkH0LCOK95KKIQhY"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394140065481-r1r61veb9r528mvuvao31lls43odn5le.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "394140065481-21rfgbja65kecigqdrc3qupi8re6ulb8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kiboNoIe"
+              }
+            }
+          ]
         }
       }
     }

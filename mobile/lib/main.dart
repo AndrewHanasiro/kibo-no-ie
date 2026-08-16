@@ -5,6 +5,7 @@ import 'package:kibo_no_ie/map.dart';
 
 import 'package:kibo_no_ie/market.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:kibo_no_ie/warning.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
@@ -13,6 +14,28 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Configure Firebase Cloud Messaging
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  
+  // Request permissions for iOS and newer Android versions
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  print('User granted permission: ${settings.authorizationStatus}');
+
+  // Subscribe to the "warnings" topic to receive official warnings
+  await messaging.subscribeToTopic('warnings');
+  print('Subscribed to warnings topic');
+
+  // Listen for foreground messages
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Received foreground message: ${message.notification?.title}');
+    // Here you could show a local notification or an in-app banner if desired.
+  });
+
   runApp(const NavigationBarApp());
 }
 

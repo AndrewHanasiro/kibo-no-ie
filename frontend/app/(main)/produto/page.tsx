@@ -15,7 +15,7 @@ export default function ProdutosPage() {
   const { products, loading, refetch } = useProducts();
 
   const categoryList = useMemo(() => {
-    return Array.from(new Set(products.map((product) => product.category)));
+    return Array.from(new Set(products.map((product) => product.category))).sort((a, b) => a.localeCompare(b));
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -27,7 +27,7 @@ export default function ProdutosPage() {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(lowerQuery));
     }
-    return result;
+    return [...result].sort((a, b) => a.name.localeCompare(b.name));
   }, [products, activeCategoryFilter, searchQuery]);
 
   const groupedList = useMemo(() => {
@@ -127,7 +127,9 @@ export default function ProdutosPage() {
       {/* Products Groups */}
       {!loading && (
         <div className="space-y-8">
-          {Object.entries(groupedList).map(([category, categoryProducts]) => (
+          {Object.entries(groupedList)
+            .sort(([catA], [catB]) => catA.localeCompare(catB))
+            .map(([category, categoryProducts]) => (
             <section key={category} className="space-y-4">
               <div className="flex items-center gap-3">
                 <span className="px-3 py-1 bg-[#eff7e1] text-[#1e4d2b] font-extrabold text-sm rounded-xl border border-[#8cb83e]/30">

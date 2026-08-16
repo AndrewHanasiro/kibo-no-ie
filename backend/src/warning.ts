@@ -1,4 +1,5 @@
 import { getDatabase } from "firebase-admin/database";
+import { getMessaging } from "firebase-admin/messaging";
 import * as logger from "firebase-functions/logger";
 import { onRequest } from "firebase-functions/https";
 import { validateAuth } from "./helper";
@@ -68,6 +69,21 @@ export const createWarning = onRequest({ cors: true }, async (request, response)
       text,
       timestamp: new Date().toISOString(),
     });
+    
+    // Send push notification to all users subscribed to "warnings"
+    try {
+      await getMessaging().send({
+        topic: "warnings",
+        notification: {
+          title: "Novo Aviso Oficial",
+          body: text,
+        },
+      });
+      logger.info("Push notification sent to warnings topic.");
+    } catch (messagingError) {
+      logger.error("Error sending push notification", messagingError);
+    }
+
     response.status(201).json({
       message: "Warning created successfully",
       id: newWarningRef.key,

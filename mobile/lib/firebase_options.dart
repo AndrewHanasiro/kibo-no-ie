@@ -54,15 +54,17 @@ class DefaultFirebaseOptions {
     appId: '1:394140065481:android:30fb94cd585e407213b718',
     messagingSenderId: '394140065481',
     projectId: 'kibo-no-ie',
+    databaseURL: 'https://kibo-no-ie-default-rtdb.firebaseio.com',
     storageBucket: 'kibo-no-ie.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBEvTGCTkniz08efThYBAun9dalLg0lGxg',
     appId: '1:394140065481:ios:fab5988c27cdf31913b718',
     messagingSenderId: '394140065481',
     projectId: 'kibo-no-ie',
+    databaseURL: 'https://kibo-no-ie-default-rtdb.firebaseio.com',
     storageBucket: 'kibo-no-ie.firebasestorage.app',
+    iosClientId: '394140065481-21rfgbja65kecigqdrc3qupi8re6ulb8.apps.googleusercontent.com',
     iosBundleId: 'com.example.kiboNoIe',
   );
 }
