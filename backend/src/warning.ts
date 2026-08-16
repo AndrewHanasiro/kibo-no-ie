@@ -77,3 +77,34 @@ export const createWarning = onRequest({ cors: true }, async (request, response)
     response.status(500).send("Internal Server Error");
   }
 });
+
+/**
+ * 6. Delete Warning
+ * Removes a warning by ID.
+ */
+export const deleteWarning = onRequest({ cors: true }, async (request, response) => {
+  const isAuthenticated = await validateAuth(request);
+  if (!isAuthenticated) {
+    response.status(401).send("Unauthorized");
+    return;
+  }
+  if (request.method !== "DELETE") {
+    response.status(405).send("Method Not Allowed");
+    return;
+  }
+  
+  const id = request.query.id || request.body.id;
+  
+  if (!id || typeof id !== "string") {
+    response.status(400).send("Warning ID is required");
+    return;
+  }
+  
+  try {
+    await db.ref(`warnings/${id}`).remove();
+    response.status(200).send(`Warning ${id} deleted successfully`);
+  } catch (error) {
+    logger.error("Error deleting warning", error);
+    response.status(500).send("Internal Server Error");
+  }
+});

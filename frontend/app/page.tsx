@@ -5,21 +5,21 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   useEffect(() => {
-    const currentUrl = window.location.pathname;
-    if (!user) {
-      router.push("/login");
-      return;
-    } else {
-      router.push(currentUrl);
-      return;
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+      } else {
+        router.push("/home");
+      }
     }
-  });
+  }, [user, loading, router]);
+  
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    <div className="flex items-center justify-center min-h-screen bg-[#f5f8f2]">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#8cb83e] border-t-transparent"></div>
     </div>
   );
 }

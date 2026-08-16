@@ -37,21 +37,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        router.push("/produto");
-      } else {
-        router.push("/login");
-      }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const login = async (email: string, pass: string) => {
     try {
       await setPersistence(auth, browserLocalPersistence);
       await signInWithEmailAndPassword(auth, email, pass);
-      router.push("/produto");
+      router.push("/home");
     } catch (error) {
       console.error("Login error:", error);
       throw error;

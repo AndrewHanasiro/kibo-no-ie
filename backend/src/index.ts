@@ -8,7 +8,7 @@ setGlobalOptions({ maxInstances: 1 });
 /**
  * Routes
  */
-export { listProducts, updateProduct, createProduct } from "./product";
-export { listWarning, createWarning } from "./warning";
+export { listProducts, updateProduct, createProduct, onProductUpdated } from "./product";
+export { listWarning, createWarning, deleteWarning } from "./warning";
 export { listShop, updateShop, createShop } from "./shop";
 

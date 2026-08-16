@@ -117,3 +117,30 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
     response.status(500).send("Internal Server Error");
   }
 });
+
+import { onValueUpdated } from "firebase-functions/v2/database";
+
+/**
+ * 4. Product Update Trigger
+ * Listens for product updates and creates a warning if the product becomes unavailable or its price changes.
+ */
+export const onProductUpdated = onValueUpdated("products/{productId}", async (event) => {
+  const before = event.data.before.val() as Product | null;
+  const after = event.data.after.val() as Product | null;
+
+  if (!before || !after) return;
+
+  const becameUnavailable = before.isAvailable && !after.isAvailable;
+  const priceChanged = before.price !== after.price;
+
+  if (becameUnavailable || priceChanged) {
+    const text = becameUnavailable
+      ? `${after.name} ficou indisponível por hoje`
+      : `${after.name} mudou de R$${before.price} para R$${after.price}.`;
+
+    await db.ref("warnings").push({
+      text,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});

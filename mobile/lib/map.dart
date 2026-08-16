@@ -290,32 +290,6 @@ class MapState extends State<Map> {
         Future.delayed(const Duration(milliseconds: 250), () async {
           final GoogleMapController controller = await _controller.future;
           
-          if (_locationPermissionGranted) {
-            try {
-              final Position position = await Geolocator.getCurrentPosition(
-                timeLimit: const Duration(seconds: 3),
-              );
-              
-              double sLat = shop.latitude <= position.latitude ? shop.latitude : position.latitude;
-              double sLng = shop.longitude <= position.longitude ? shop.longitude : position.longitude;
-              double nLat = shop.latitude > position.latitude ? shop.latitude : position.latitude;
-              double nLng = shop.longitude > position.longitude ? shop.longitude : position.longitude;
-              
-              if (nLat - sLat < 0.0001) nLat += 0.0001;
-              if (nLng - sLng < 0.0001) nLng += 0.0001;
-
-              final LatLngBounds bounds = LatLngBounds(
-                southwest: LatLng(sLat, sLng),
-                northeast: LatLng(nLat, nLng),
-              );
-              
-              controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100.0));
-              return;
-            } catch (e) {
-              // Fallback to only shop if location fails
-            }
-          }
-
           controller.animateCamera(
             CameraUpdate.newCameraPosition(
               CameraPosition(
@@ -353,10 +327,17 @@ class MapState extends State<Map> {
           GoogleMap(
             mapType: MapType.satellite,
             initialCameraPosition: _initPosition,
-            scrollGesturesEnabled: false,
+            scrollGesturesEnabled: true,
             zoomGesturesEnabled: true,
             tiltGesturesEnabled: false,
             rotateGesturesEnabled: false,
+            cameraTargetBounds: CameraTargetBounds(
+              LatLngBounds(
+                southwest: const LatLng(-23.4353, -46.3583),
+                northeast: const LatLng(-23.4349, -46.3577),
+              ),
+            ),
+            minMaxZoomPreference: const MinMaxZoomPreference(18.0, 20.0),
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
             },

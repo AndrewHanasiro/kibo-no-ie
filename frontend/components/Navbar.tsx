@@ -13,6 +13,7 @@ export default function Navbar() {
     { name: "Mapa do Evento", href: "/home", icon: "🗺️" },
     { name: "Produtos", href: "/produto", icon: "🍱" },
     { name: "Lojas & Barracas", href: "/loja", icon: "🎪" },
+    { name: "Avisos", href: "/avisos", icon: "⚠️" },
   ];
 
   return (
