@@ -4,7 +4,7 @@
     <application
         android:label="kibo_no_ie"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyCBfa4W5KSboDiyIl8A2ZqwfLOIDZVHqHo"/>
         <activity

@@ -40,6 +40,9 @@ flutter pub get
 echo "🤖 Gerando o Android App Bundle (.aab)..."
 flutter build appbundle
 
+echo "🤖 Gerando o Android Application Package (.apk)..."
+flutter build apk
+
 if [ "$(uname)" == "Darwin" ]; then
     echo "🍎 Gerando o iOS App Store Package (.ipa)..."
     flutter build ipa

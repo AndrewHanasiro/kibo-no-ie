@@ -9,10 +9,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:kibo_no_ie/warning.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  const envFileName = kReleaseMode ? ".env.production" : ".env.local";
+  await dotenv.load(fileName: envFileName);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Configure Firebase Cloud Messaging
