@@ -28,7 +28,9 @@ class _WarningBoardState extends State<WarningBoard> {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList.map((json) => Warning.fromJson(json)).toList();
+      final warnings = jsonList.map((json) => Warning.fromJson(json)).toList();
+      warnings.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return warnings;
     } else {
       throw Exception('Falha ao carregar comunicados oficiais');
     }
@@ -250,14 +252,27 @@ class WarningItemTile extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'Aviso Oficial',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1E4D2B),
-                                    textBaseline: TextBaseline.alphabetic,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Aviso Oficial',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1E4D2B),
+                                        textBaseline: TextBaseline.alphabetic,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${warning.timestamp.day.toString().padLeft(2, '0')}/${warning.timestamp.month.toString().padLeft(2, '0')}/${warning.timestamp.year} às ${warning.timestamp.hour.toString().padLeft(2, '0')}:${warning.timestamp.minute.toString().padLeft(2, '0')}',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: Color(0xFF566755),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 if (index == 0)
                                   Container(
