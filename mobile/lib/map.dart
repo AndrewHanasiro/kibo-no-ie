@@ -24,6 +24,8 @@ class MapState extends State<Map> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  TextEditingController? _searchController;
+
   static const CameraPosition _initPosition = CameraPosition(
     bearing: 0,
     target: LatLng(-23.435119625012014, -46.35803342659766),
@@ -276,11 +278,15 @@ class MapState extends State<Map> {
   }
 
   void _onProductSelected(Product product) async {
+    // Unfocus and clear text slightly after so Autocomplete overlay closes
+    Future.delayed(const Duration(milliseconds: 50), () {
+      _searchController?.clear();
+      if (mounted) FocusScope.of(context).unfocus();
+    });
+    
     if (product.shopId != null && product.shopId!.isNotEmpty) {
       try {
         final shop = _shops.firstWhere((s) => s.id == product.shopId);
-        
-        FocusScope.of(context).unfocus();
 
         setState(() {
           _selectedShopId = shop.id;
@@ -333,8 +339,8 @@ class MapState extends State<Map> {
             rotateGesturesEnabled: false,
             cameraTargetBounds: CameraTargetBounds(
               LatLngBounds(
-                southwest: const LatLng(-23.4353, -46.3583),
-                northeast: const LatLng(-23.4349, -46.3577),
+                southwest: const LatLng(-23.4365, -46.3595),
+                northeast: const LatLng(-23.4335, -46.3565),
               ),
             ),
             minMaxZoomPreference: const MinMaxZoomPreference(18.0, 20.0),
@@ -435,6 +441,8 @@ class MapState extends State<Map> {
                       },
                       onSelected: _onProductSelected,
                       fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                        _searchController = controller;
+                        
                         void executeSearch(String value) {
                           if (value.isNotEmpty) {
                             final matches = _products.where((p) => 
