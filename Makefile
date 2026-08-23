@@ -1,8 +1,10 @@
-.PHONY: dev backend admin mobile deploy
+.PHONY: dev backend admin mobile visitante deploy
 
 # Inicia o backend, admin e visitante simultaneamente
 dev:
 	@echo "🚀 Iniciando o ambiente de desenvolvimento (Backend, Admin e Visitante)..."
+	@echo "💻 Admin estará disponível em: http://localhost:3000"
+	@echo "🌐 Visitante estará disponível em: http://localhost:5173"
 	@make -j3 backend admin visitante
 
 # Inicia apenas o backend (Emuladores do Firebase)
