@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "kibo-no-ie"
-  }
+  },
+  "targets": {
+    "kibo-no-ie": {
+      "hosting": {
+        "visitante": [
+          "kibo-no-ie-visitante"
+        ],
+        "admin": [
+          "kibo-no-ie"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

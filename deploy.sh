@@ -28,7 +28,19 @@ echo "🛠️  Gerando build de produção do Next.js..."
 npm run build
 cd ..
 
-# 3. Build do Mobile
+# 3. Build do Visitante
+echo ""
+echo "========================================="
+echo "💻 Preparando o Visitante Web..."
+echo "========================================="
+cd visitante
+echo "📦 Instalando dependências do visitante..."
+npm ci
+echo "🛠️  Gerando build de produção do Vite..."
+npm run build
+cd ..
+
+# 4. Build do Mobile
 echo ""
 echo "========================================="
 echo "📱 Gerando os artefatos do App Mobile..."
@@ -51,7 +63,7 @@ else
 fi
 cd ..
 
-# 4. Deploy no Firebase
+# 5. Deploy no Firebase
 echo ""
 echo "========================================="
 echo "☁️  Realizando deploy no Firebase..."

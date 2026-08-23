@@ -63,15 +63,6 @@ function Home() {
   );
 }
 
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-kibo-bg p-4">
-      <h1 className="text-3xl font-bold text-primary-forest mb-4">{title}</h1>
-      <Link to="/" className="text-secondary-leaf underline hover:text-primary-forest">Voltar ao início</Link>
-    </div>
-  );
-}
-
 function App() {
   return (
     <BrowserRouter>
