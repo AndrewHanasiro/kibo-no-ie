@@ -6,14 +6,16 @@
 
 ## 📌 Visão Geral da Arquitetura
 
-O projeto é dividido em três frentes complementares que se comunicam através da infraestrutura do Firebase:
+O projeto é dividido em quatro frentes complementares que se comunicam através da infraestrutura do Firebase:
 
 ```mermaid
 graph TD
     subgraph Clientes
         Mobile["📱 Mobile (Flutter)\nApp para Visitantes"]
-        Frontend["💻 Frontend (Next.js)\nPainel Administrativo"]
+        Admin["💻 Admin (Next.js)\nPainel Administrativo"]
+        Visitante["🌐 Visitante Web (React)\nSPA PWA para Visitantes"]
     end
+
 
     subgraph Nuvem / Firebase
         Functions["⚙️ Backend (Cloud Functions)\nNode.js + TypeScript"]
@@ -23,11 +25,12 @@ graph TD
     end
 
     Mobile -->|Consome APIs Públicas| Functions
-    Frontend -->|Autentica| Auth
-    Frontend -->|Requisições Autenticadas| Functions
+    Visitante -->|Consome APIs Públicas| Functions
+    Admin -->|Autentica| Auth
+    Admin -->|Requisições Autenticadas| Functions
     Functions -->|Leitura e Escrita| RTDB
     Functions -->|Upload de Imagens| Storage
-    Frontend -.->|Google Maps API| GMapAdmin["Google Maps"]
+    Admin -.->|Google Maps API| GMapAdmin["Google Maps"]
     Mobile -.->|Google Maps SDK| GMapMobile["Google Maps"]
 ```
 
@@ -38,8 +41,9 @@ graph TD
 ```text
 kibo-no-ie/
 ├── backend/      # Firebase Cloud Functions (API REST Serverless em TypeScript)
-├── frontend/     # Painel de administração Web (Next.js 16 + React 19 + TailwindCSS)
+├── admin/        # Painel de administração Web (Next.js 16 + React 19 + TailwindCSS)
 ├── mobile/       # Aplicativo para visitantes (Flutter + Dart)
+├── visitante/    # App Web para visitantes (React + Vite + PWA)
 ├── firebase.json # Configuração de deploy do ecossistema Firebase (Hosting & Functions)
 └── LICENSE       # Licença do projeto (Apache 2.0)
 ```
@@ -98,7 +102,7 @@ firebase deploy --only functions
 
 ---
 
-## 💻 2. Frontend Web (`/frontend`)
+## 💻 2. Admin Web (`/admin`)
 
 Painel administrativo responsivo voltado para a equipe de coordenação e voluntários do evento.
 
@@ -119,7 +123,7 @@ Painel administrativo responsivo voltado para a equipe de coordenação e volunt
 
 ```bash
 # Navegar até o diretório
-cd frontend
+cd admin
 
 # Instalar dependências
 npm install
@@ -180,6 +184,41 @@ flutter run
 
 ---
 
+## 🌐 4. Visitante Web (`/visitante`)
+
+Aplicativo Web Single Page Application (SPA) projetado como alternativa ao app móvel, oferecendo as mesmas funcionalidades nativas diretamente pelo navegador.
+
+### 🎯 O que faz
+* **Instalável (PWA)**: Pode ser instalado na tela inicial do dispositivo através do Service Worker, rodando como um aplicativo nativo.
+* **Mapa do Local**: Acesso rápido à localização de estandes e atrações.
+* **Catálogo de Produtos**: Lista interativa de comidas, bebidas e produtos, dividida por categorias.
+* **Avisos em Tempo Real**: Feed para acompanhar as novidades e recados importantes.
+
+### 🛠️ Como faz (Tecnologias & Implementação)
+* **Framework**: React 19 empacotado via Vite.
+* **Estilização**: TailwindCSS v4 compartilhando o mesmo *design system* e cores do projeto (ex: `primary-forest`, `kibo-bg`).
+* **PWA**: Plugin `vite-plugin-pwa` para gerar o manifesto automaticamente e registrar o service worker de cache offline e instalação.
+* **Roteamento**: `react-router-dom` para navegação fluida entre mapa, produtos e avisos.
+
+### 🚀 Como Executar
+
+```bash
+# Navegar até o diretório
+cd visitante
+
+# Instalar dependências
+npm install
+
+# Iniciar em ambiente de desenvolvimento
+npm run dev
+
+# Gerar build de produção
+npm run build
+```
+
+---
+
+
 ## 🔐 Configuração e Variáveis de Ambiente
 
 Para rodar todo o ecossistema localmente, certifique-se de configurar:
@@ -191,7 +230,7 @@ Para rodar todo o ecossistema localmente, certifique-se de configurar:
    firebase use <id-do-projeto>
    ```
 2. **Google Maps API Key**:
-   * Habilitar Maps JavaScript API (para o Frontend Web).
+   * Habilitar Maps JavaScript API (para o Admin Web).
    * Habilitar Maps SDK for Android e Maps SDK for iOS (para o Mobile).
 
 ---

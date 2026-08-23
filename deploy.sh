@@ -16,13 +16,13 @@ echo "🛠️  Compilando o TypeScript..."
 npm run build
 cd ..
 
-# 2. Build do Frontend
+# 2. Build do Admin
 echo ""
 echo "========================================="
-echo "💻 Preparando o Frontend Web..."
+echo "💻 Preparando o Admin Web..."
 echo "========================================="
-cd frontend
-echo "📦 Instalando dependências do frontend..."
+cd admin
+echo "📦 Instalando dependências do admin..."
 npm ci
 echo "🛠️  Gerando build de produção do Next.js..."
 npm run build

@@ -1,5 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
+import { Request } from "firebase-functions";
 import * as logger from "firebase-functions/logger";
 
 const auth = getAuth();
@@ -7,7 +8,7 @@ const bucket = getStorage().bucket();
 /**
  * Helper to validate Firebase ID Tokens
  */
-export const validateAuth = async (request: any): Promise<boolean> => {
+export const validateAuth = async (request: Request): Promise<boolean> => {
   const authorization = request.get("Authorization");
   if (!authorization || !authorization.startsWith("Bearer ")) {
     return false;
