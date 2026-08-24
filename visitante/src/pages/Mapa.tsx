@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, MapPin, Search, Store } from 'lucide-react';
 import type { Shop } from '../types/shop';
@@ -37,12 +37,15 @@ const mapOptions = {
 };
 
 export default function Mapa() {
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-  });
+  return (
+    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}>
+      <MapaInner />
+    </APIProvider>
+  );
+}
 
-  const mapRef = useRef<google.maps.Map | null>(null);
+function MapaInner() {
+  const map = useMap();
 
   const [shops, setShops] = useState<Shop[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -85,23 +88,15 @@ export default function Mapa() {
     });
   }, [fetchShops, fetchProducts]);
 
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
-
-  const onMapUnmount = useCallback(() => {
-    mapRef.current = null;
-  }, []);
-
   const handleShopSelect = useCallback((shop: Shop) => {
     setSelectedShop(shop);
     setSelectedShopId(shop.id);
     setSearchError(null);
-    if (mapRef.current) {
-      mapRef.current.panTo({ lat: shop.latitude, lng: shop.longitude });
-      mapRef.current.setZoom(19.5);
+    if (map) {
+      map.panTo({ lat: shop.latitude, lng: shop.longitude });
+      map.setZoom(19.5);
     }
-  }, []);
+  }, [map]);
 
   const handleProductSelect = useCallback((product: Product) => {
     setSearchQuery(product.name);
@@ -214,48 +209,36 @@ export default function Mapa() {
 
       {/* Google Map */}
       <div className="flex-1 w-full h-full relative z-10">
-        {!isLoaded ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
-            <div className="w-8 h-8 border-4 border-secondary-leaf border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-[#566755] text-sm font-medium">Carregando mapa...</p>
-          </div>
-        ) : (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={18.5}
-            options={mapOptions}
-            onLoad={onMapLoad}
-            onUnmount={onMapUnmount}
-            onClick={() => {
-              if (selectedShop) setSelectedShop(null);
-            }}
-          >
-            {shops.map((shop) => {
-              const isSelected = selectedShopId === null || selectedShopId === shop.id;
-              const isHighlighted = selectedShopId === shop.id;
-              
-              // In mobile they used red/green hues. 
-              // Red Hue is default, Green Hue we can simulate with standard URL or SVG.
-              // Here we will use a simple dot marker or a default marker.
-              const iconUrl = isHighlighted 
-                ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' 
-                : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+        <Map
+          mapId="DEMO_MAP_ID"
+          defaultCenter={center}
+          defaultZoom={18.5}
+          style={containerStyle}
+          {...mapOptions}
+          onClick={() => {
+            if (selectedShop) setSelectedShop(null);
+          }}
+        >
+          {shops.map((shop) => {
+            const isSelected = selectedShopId === null || selectedShopId === shop.id;
+            const isHighlighted = selectedShopId === shop.id;
 
-              return (
-                <MarkerF
-                  key={shop.id}
-                  position={{ lat: shop.latitude, lng: shop.longitude }}
-                  opacity={isSelected ? 1.0 : 0.4}
-                  icon={{
-                    url: iconUrl,
-                  }}
-                  onClick={() => handleShopSelect(shop)}
+            return (
+              <AdvancedMarker
+                key={shop.id}
+                position={{ lat: shop.latitude, lng: shop.longitude }}
+                onClick={() => handleShopSelect(shop)}
+                style={{ opacity: isSelected ? 1.0 : 0.4 }}
+              >
+                <Pin
+                  background={isHighlighted ? '#1e4d2b' : '#E53935'}
+                  borderColor={isHighlighted ? '#13301A' : '#B71C1C'}
+                  glyphColor={'#ffffff'}
                 />
-              );
-            })}
-          </GoogleMap>
-        )}
+              </AdvancedMarker>
+            );
+          })}
+        </Map>
       </div>
 
       {/* Shop Details Modal (Bottom Sheet style) */}
@@ -326,3 +309,4 @@ export default function Mapa() {
     </div>
   );
 }
+
