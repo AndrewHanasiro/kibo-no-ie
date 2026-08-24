@@ -16,7 +16,7 @@ function Home() {
             <HeartHandshake size={40} className="text-white" />
           </div>
         </div>
-        <h1 className="text-4xl font-bold text-primary-forest mb-2 tracking-tight">Kibô-no-Iê</h1>
+        <h1 className="text-4xl font-bold text-primary-forest mb-2 tracking-tight">46ª Festa do Verde </h1>
         <p className="text-secondary-leaf font-bold text-lg">Guia do Visitante</p>
       </header>
 
@@ -24,7 +24,7 @@ function Home() {
         <div className="bg-white rounded-3xl shadow-xl shadow-black/5 p-8 border border-[#E1EBE0]">
           <h2 className="text-2xl font-bold text-[#1B261D] mb-3">Bem-vindo(a)!</h2>
           <p className="text-[#566755] mb-8 text-sm leading-relaxed">
-            Explore as barracas da festa, confira nosso cardápio completo e fique por dentro de todos os avisos da organização.
+            Explore as barracas da festa, confira nosso cardápio completo e fique por dentro de todos os avisos do festival.
           </p>
           <div className="flex flex-col gap-4">
             <Link
