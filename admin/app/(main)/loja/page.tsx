@@ -86,8 +86,8 @@ export default function LojasPage() {
                   </p>
                   <p className="text-xs text-[#7b8e79] mt-0.5 flex items-center gap-1">
                     <span>📍</span>
-                    {p.latitude && p.longitude
-                      ? `${p.latitude.toFixed(4)}, ${p.longitude.toFixed(4)}`
+                    {p.locations && p.locations.length > 0
+                      ? `${p.locations.length} localizaç${p.locations.length > 1 ? 'ões' : 'ão'}`
                       : "Local não definido"}
                   </p>
                 </div>

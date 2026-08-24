@@ -1,7 +1,11 @@
+export interface Location {
+  latitude: number;
+  longitude: number;
+}
+
 export interface Shop {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  locations: Location[];
   image: string;
 }

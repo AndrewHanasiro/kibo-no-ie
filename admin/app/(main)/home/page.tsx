@@ -83,20 +83,23 @@ export default function HomePage() {
               fullscreenControl: true,
             }}
           >
-            {shops?.map((shop) => (
-              shop.latitude && shop.longitude && (
+            {shops?.flatMap((shop) => 
+              (shop.locations || []).map((loc, index) => (
                 <MarkerF
-                  key={shop.id}
-                  position={{ lat: shop.latitude, lng: shop.longitude }}
+                  key={`${shop.id}-${index}`}
+                  position={{ lat: loc.latitude, lng: loc.longitude }}
                   title={shop.name}
-                  onClick={() => setSelectedShop(shop)}
+                  onClick={() => {
+                    setSelectedShop(shop);
+                    // store a custom prop or just let it open on the first loc
+                  }}
                 />
-              )
-            ))}
+              ))
+            )}
 
-            {selectedShop && selectedShop.latitude && selectedShop.longitude && (
+            {selectedShop && selectedShop.locations && selectedShop.locations.length > 0 && (
               <InfoWindowF
-                position={{ lat: selectedShop.latitude, lng: selectedShop.longitude }}
+                position={{ lat: selectedShop.locations[0].latitude, lng: selectedShop.locations[0].longitude }}
                 onCloseClick={() => setSelectedShop(null)}
               >
                 <div className="p-2 flex flex-col items-center gap-2 max-w-[200px] text-center font-sans">
@@ -115,7 +118,7 @@ export default function HomePage() {
                     />
                   )}
                   <p className="text-[10px] text-[#7b8e79]">
-                    Lat: {selectedShop.latitude.toFixed(4)}, Lng: {selectedShop.longitude.toFixed(4)}
+                    {selectedShop.locations.length} localizaç{selectedShop.locations.length > 1 ? 'ões' : 'ão'}
                   </p>
                 </div>
               </InfoWindowF>

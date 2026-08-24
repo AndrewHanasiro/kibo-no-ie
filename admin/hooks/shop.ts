@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 
+export type Location = {
+  latitude: number;
+  longitude: number;
+};
+
 export type Shop = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  locations: Location[];
   image: string;
 };
 

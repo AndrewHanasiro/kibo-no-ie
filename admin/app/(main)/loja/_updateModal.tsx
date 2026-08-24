@@ -22,11 +22,8 @@ type UpdateShopModalProps = {
 
 export default function UpdateShopModal(props: UpdateShopModalProps) {
   const [name, setName] = useState(props.selectedShop.name);
-  const [lat, setLat] = useState<number | null>(
-    props.selectedShop.latitude ?? null,
-  );
-  const [lng, setLng] = useState<number | null>(
-    props.selectedShop.longitude ?? null,
+  const [locations, setLocations] = useState<{latitude: number, longitude: number}[]>(
+    props.selectedShop.locations || []
   );
   const [image, setImage] = useState<string>(props.selectedShop.image ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,8 +63,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
           body: JSON.stringify({
             id: props.selectedShop.id,
             ...(props.selectedShop.name !== name && { name }),
-            ...(props.selectedShop.latitude !== lat && { latitude: lat }),
-            ...(props.selectedShop.longitude !== lng && { longitude: lng }),
+            locations: locations, // Always send locations to update
             ...(props.selectedShop.image !== image && { image }),
           }),
         },
@@ -86,10 +82,15 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
 
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
-      setLat(e.latLng.lat());
-      setLng(e.latLng.lng());
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      setLocations((prev) => [...prev, { latitude: lat, longitude: lng }]);
     }
   }, []);
+
+  const handleRemoveLocation = (index: number) => {
+    setLocations((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const onLoad = useCallback(function callback(m: google.maps.Map) {
     setMap(m);
@@ -99,7 +100,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
     setMap(null);
   }, []);
 
-  const center = lat && lng ? { lat, lng } : defaultCenter;
+  const center = locations.length > 0 ? { lat: locations[0].latitude, lng: locations[0].longitude } : defaultCenter;
 
   return (
     <div className="fixed inset-0 bg-[#1b261d]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -162,10 +163,10 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
           <div>
             <div className="flex justify-between items-center mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d]">
-                Localização no Mapa
+                Localizações no Mapa
               </label>
               <span className="text-[11px] text-[#8cb83e] font-bold">
-                (Clique no mapa para posicionar)
+                (Clique no mapa para adicionar pontos)
               </span>
             </div>
             <div className="rounded-2xl overflow-hidden border border-[#d2dfd0] shadow-inner">
@@ -182,9 +183,9 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
                     mapTypeControl: true,
                   }}
                 >
-                  {lat !== null && lng !== null && (
-                    <MarkerF position={{ lat, lng }} />
-                  )}
+                  {locations.map((loc, index) => (
+                    <MarkerF key={index} position={{ lat: loc.latitude, lng: loc.longitude }} />
+                  ))}
                 </GoogleMap>
               ) : (
                 <div className="h-[250px] bg-[#f8faf7] flex items-center justify-center text-[#566755] text-sm">
@@ -192,11 +193,20 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
                 </div>
               )}
             </div>
-            {lat && lng && (
-              <p className="mt-2 text-xs text-[#7b8e79] flex items-center gap-1 font-medium">
-                <span>📍 Coordenadas selecionadas:</span>
-                <span className="font-bold text-[#1e4d2b]">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
-              </p>
+            {locations.length > 0 && (
+              <div className="mt-2 space-y-1 max-h-24 overflow-y-auto">
+                {locations.map((loc, index) => (
+                  <div key={index} className="flex justify-between items-center bg-[#f8faf7] p-2 rounded-lg border border-[#e1ebe0]">
+                    <p className="text-xs text-[#7b8e79] font-medium">
+                      <span>📍 Ponto {index + 1}:</span>
+                      <span className="font-bold text-[#1e4d2b] ml-1">{loc.latitude.toFixed(6)}, {loc.longitude.toFixed(6)}</span>
+                    </p>
+                    <button type="button" onClick={() => handleRemoveLocation(index)} className="text-red-500 hover:text-red-700 text-xs font-bold">
+                      Remover
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

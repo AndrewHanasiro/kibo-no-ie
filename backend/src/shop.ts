@@ -5,16 +5,20 @@ import { getDatabase } from "firebase-admin/database";
 
 const db = getDatabase();
 
-type Shop = {
-  name: string;
+type Location = {
   latitude: number;
   longitude: number;
+};
+
+type Shop = {
+  name: string;
+  locations: Location[];
   image: string;
 };
 
 /**
  * 1. List Shop
- * Fetches name, latitude, longitude and image from the 'shops' collection.
+ * Fetches name, locations and image from the 'shops' collection.
  */
 export const listShop = onRequest({ cors: true }, async (request, response) => {
   try {
@@ -27,8 +31,7 @@ export const listShop = onRequest({ cors: true }, async (request, response) => {
     const shopList = Object.keys(data).map((id) => ({
       id,
       name: data[id].name,
-      latitude: data[id].latitude,
-      longitude: data[id].longitude,
+      locations: data[id].locations || [],
       image: data[id].image,
     }));
     response.status(200).json(shopList);
@@ -54,7 +57,7 @@ export const updateShop = onRequest(
       response.status(405).send("Method Not Allowed");
       return;
     }
-    const { id, name, latitude, longitude, image } = request.body;
+    const { id, name, locations, image } = request.body;
     if (!id) {
       response.status(400).send("Shop ID is required");
       return;
@@ -62,8 +65,7 @@ export const updateShop = onRequest(
     try {
       const updates: Partial<Shop> = {};
       if (name !== undefined) updates.name = name;
-      if (latitude !== undefined) updates.latitude = latitude;
-      if (longitude !== undefined) updates.longitude = longitude;
+      if (locations !== undefined) updates.locations = locations;
       if (image !== undefined) {
         const imageUrl = await uploadToStorage(image);
         updates.image = imageUrl;
@@ -93,11 +95,11 @@ export const createShop = onRequest(
       response.status(405).send("Method Not Allowed");
       return;
     }
-    const { name, latitude, longitude, image } = request.body;
-    if (!name || latitude === undefined || longitude === undefined || !image) {
+    const { name, locations, image } = request.body;
+    if (!name || !locations || !Array.isArray(locations) || !image) {
       response
         .status(400)
-        .send("Missing required fields: name, latitude, longitude, or image");
+        .send("Missing required fields: name, locations (array), or image");
       return;
     }
     try {
@@ -107,8 +109,7 @@ export const createShop = onRequest(
       const newShopRef = shopsRef.push();
       await newShopRef.set({
         name,
-        latitude,
-        longitude,
+        locations,
         image: imageUrl,
         createdAt: new Date().toISOString(),
       });

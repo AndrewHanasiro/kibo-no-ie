@@ -8,6 +8,16 @@ import 'package:kibo_no_ie/models/shop.dart';
 import 'package:kibo_no_ie/models/product.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:math' show cos, sqrt, asin;
+
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  var p = 0.017453292519943295;
+  var c = cos;
+  var a = 0.5 -
+      c((lat2 - lat1) * p) / 2 +
+      c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+  return 12742 * asin(sqrt(a));
+}
 
 final String shopApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listShop' :'https://listshop-veumhwpskq-uc.a.run.app';
 final String productApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listProducts' : 'https://listproducts-veumhwpskq-uc.a.run.app';
@@ -77,30 +87,35 @@ class MapState extends State<Map> {
   }
 
   void _updateMarkers() {
-    _markers = _shops.map((shop) {
+    _markers = _shops.expand((shop) {
       final isSelected = _selectedShopId == null || shop.id == _selectedShopId;
       final isHighlighted = shop.id == _selectedShopId;
       
-      return Marker(
-        markerId: MarkerId(shop.id),
-        position: LatLng(shop.latitude, shop.longitude),
-        alpha: isSelected ? 1.0 : 0.4, // Faded for unselected
-        icon: isHighlighted
-            ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
-            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(
-          title: shop.name,
-          snippet: 'Toque para ver a barraca',
-          onTap: () => _showShopDetails(shop),
-        ),
-        onTap: () {
-          setState(() {
-            _selectedShopId = shop.id;
-            _updateMarkers();
-          });
-          _showShopDetails(shop);
-        },
-      );
+      int i = 0;
+      return shop.locations.map((loc) {
+        final id = '${shop.id}_$i';
+        i++;
+        return Marker(
+          markerId: MarkerId(id),
+          position: LatLng(loc.latitude, loc.longitude),
+          alpha: isSelected ? 1.0 : 0.4,
+          icon: isHighlighted
+              ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
+              : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: InfoWindow(
+            title: shop.name,
+            snippet: 'Toque para ver a barraca',
+            onTap: () => _showShopDetails(shop),
+          ),
+          onTap: () {
+            setState(() {
+              _selectedShopId = shop.id;
+              _updateMarkers();
+            });
+            _showShopDetails(shop);
+          },
+        );
+      });
     }).toSet();
   }
 
@@ -239,7 +254,7 @@ class MapState extends State<Map> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Local: ${shop.latitude.toStringAsFixed(4)}, ${shop.longitude.toStringAsFixed(4)}',
+                    '${shop.locations.length} localizaç${shop.locations.length > 1 ? 'ões' : 'ão'}',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -295,11 +310,28 @@ class MapState extends State<Map> {
 
         Future.delayed(const Duration(milliseconds: 250), () async {
           final GoogleMapController controller = await _controller.future;
-          
+          Location targetLoc = shop.locations.isNotEmpty ? shop.locations[0] : Location(latitude: 0, longitude: 0);
+
+          if (shop.locations.length > 1 && _locationPermissionGranted) {
+            try {
+              Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+              double minDistance = double.infinity;
+              for (var loc in shop.locations) {
+                double distance = calculateDistance(position.latitude, position.longitude, loc.latitude, loc.longitude);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  targetLoc = loc;
+                }
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
+
           controller.animateCamera(
             CameraUpdate.newCameraPosition(
               CameraPosition(
-                target: LatLng(shop.latitude, shop.longitude),
+                target: LatLng(targetLoc.latitude, targetLoc.longitude),
                 zoom: 19.5,
               ),
             ),

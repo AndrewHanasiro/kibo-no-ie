@@ -2,8 +2,19 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, MapPin, Search, Store } from 'lucide-react';
-import type { Shop } from '../types/shop';
+import type { Shop, Location } from '../types/shop';
 import type { Product } from '../types/product';
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const SHOP_URL = backendUrl ? `${backendUrl}/listShop` : 'https://listshop-veumhwpskq-uc.a.run.app';
@@ -88,13 +99,16 @@ function MapaInner() {
     });
   }, [fetchShops, fetchProducts]);
 
-  const handleShopSelect = useCallback((shop: Shop) => {
+  const handleShopSelect = useCallback((shop: Shop, loc?: Location) => {
     setSelectedShop(shop);
     setSelectedShopId(shop.id);
     setSearchError(null);
     if (map) {
-      map.panTo({ lat: shop.latitude, lng: shop.longitude });
-      map.setZoom(19.5);
+      const targetLoc = loc || (shop.locations && shop.locations[0]);
+      if (targetLoc) {
+        map.panTo({ lat: targetLoc.latitude, lng: targetLoc.longitude });
+        map.setZoom(19.5);
+      }
     }
   }, [map]);
 
@@ -105,7 +119,29 @@ function MapaInner() {
     if (product.shopId) {
       const shop = shops.find(s => s.id === product.shopId);
       if (shop) {
-        handleShopSelect(shop);
+        if (shop.locations && shop.locations.length > 1 && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const userLat = pos.coords.latitude;
+              const userLng = pos.coords.longitude;
+              let closest = shop.locations[0];
+              let minDistance = calculateDistance(userLat, userLng, closest.latitude, closest.longitude);
+              for (let i = 1; i < shop.locations.length; i++) {
+                const d = calculateDistance(userLat, userLng, shop.locations[i].latitude, shop.locations[i].longitude);
+                if (d < minDistance) {
+                  minDistance = d;
+                  closest = shop.locations[i];
+                }
+              }
+              handleShopSelect(shop, closest);
+            },
+            () => {
+              handleShopSelect(shop, shop.locations[0]);
+            }
+          );
+        } else {
+          handleShopSelect(shop, shop.locations ? shop.locations[0] : undefined);
+        }
       } else {
         setSearchError('Barraca não encontrada para este produto.');
       }
@@ -219,15 +255,15 @@ function MapaInner() {
             if (selectedShop) setSelectedShop(null);
           }}
         >
-          {shops.map((shop) => {
+          {shops.flatMap((shop) => {
             const isSelected = selectedShopId === null || selectedShopId === shop.id;
             const isHighlighted = selectedShopId === shop.id;
 
-            return (
+            return (shop.locations || []).map((loc, index) => (
               <AdvancedMarker
-                key={shop.id}
-                position={{ lat: shop.latitude, lng: shop.longitude }}
-                onClick={() => handleShopSelect(shop)}
+                key={`${shop.id}-${index}`}
+                position={{ lat: loc.latitude, lng: loc.longitude }}
+                onClick={() => handleShopSelect(shop, loc)}
                 style={{ opacity: isSelected ? 1.0 : 0.4 }}
               >
                 <Pin
@@ -236,7 +272,7 @@ function MapaInner() {
                   glyphColor={'#ffffff'}
                 />
               </AdvancedMarker>
-            );
+            ));
           })}
         </Map>
       </div>
@@ -285,7 +321,9 @@ function MapaInner() {
             {/* Coordinates */}
             <div className="bg-[#F5F8F2] px-3 py-1.5 rounded-lg mb-6">
               <span className="text-[10px] font-semibold text-[#566755]">
-                Local: {selectedShop.latitude.toFixed(4)}, {selectedShop.longitude.toFixed(4)}
+                {selectedShop.locations && selectedShop.locations.length > 0
+                  ? `${selectedShop.locations.length} localizaç${selectedShop.locations.length > 1 ? 'ões' : 'ão'} no mapa`
+                  : 'Local não definido'}
               </span>
             </div>
 
