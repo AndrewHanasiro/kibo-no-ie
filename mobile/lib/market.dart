@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'models/product.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-final String mockApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listProducts' : 'https://listproducts-veumhwpskq-uc.a.run.app';
+import 'services/api_service.dart';
 
 class Market extends StatefulWidget {
   const Market({super.key});
@@ -28,21 +24,14 @@ class _MarketState extends State<Market> {
   }
 
   Future<List<Product>> _fetchProducts() async {
-    final response = await http.get(Uri.parse(mockApiUrl));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      final products = jsonList.map((json) => Product.fromJson(json)).toList();
-      if (mounted) {
-        setState(() {
-          _allProducts = products;
-          _categories = ['Todos'] + products.map((p) => p.category).toSet().toList();
-        });
-      }
-      return products;
-    } else {
-      throw Exception('Falha ao carregar os produtos do cardápio');
+    final products = await ApiService.getProducts();
+    if (mounted) {
+      setState(() {
+        _allProducts = products;
+        _categories = ['Todos'] + products.map((p) => p.category).toSet().toList();
+      });
     }
+    return products;
   }
 
   void _updateTotal(Product product, bool isAdding) {

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'models/warning.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-final String apiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listWarning' : 'https://listwarning-veumhwpskq-uc.a.run.app';
+import 'services/api_service.dart';
 
 class WarningBoard extends StatefulWidget {
   const WarningBoard({super.key});
@@ -24,16 +20,7 @@ class _WarningBoardState extends State<WarningBoard> {
   }
 
   Future<List<Warning>> _fetchWarnings() async {
-    final response = await http.get(Uri.parse(apiUrl));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      final warnings = jsonList.map((json) => Warning.fromJson(json)).toList();
-      warnings.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      return warnings;
-    } else {
-      throw Exception('Falha ao carregar comunicados oficiais');
-    }
+    return await ApiService.getWarnings();
   }
 
   @override

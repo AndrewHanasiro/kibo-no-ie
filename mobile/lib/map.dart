@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:kibo_no_ie/models/shop.dart';
 import 'package:kibo_no_ie/models/product.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:kibo_no_ie/services/api_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math' show cos, sqrt, asin;
 
@@ -18,9 +17,6 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
       c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
   return 12742 * asin(sqrt(a));
 }
-
-final String shopApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listShop' :'https://listshop-veumhwpskq-uc.a.run.app';
-final String productApiUrl = dotenv.env['API_URL'] != null ? '${dotenv.env['API_URL']}/listProducts' : 'https://listproducts-veumhwpskq-uc.a.run.app';
 
 class Map extends StatefulWidget {
   const Map({super.key});
@@ -121,14 +117,11 @@ class MapState extends State<Map> {
 
   Future<void> _fetchProducts() async {
     try {
-      final response = await http.get(Uri.parse(productApiUrl));
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(response.body);
-        if (mounted) {
-          setState(() {
-            _products = jsonList.map((json) => Product.fromJson(json)).toList();
-          });
-        }
+      final products = await ApiService.getProducts();
+      if (mounted) {
+        setState(() {
+          _products = products;
+        });
       }
     } catch (e) {
       // Ignore
@@ -136,23 +129,14 @@ class MapState extends State<Map> {
   }
 
   Future<void> _fetchShops() async {
-    
     try {
-      final response = await http.get(Uri.parse(shopApiUrl));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(response.body);
-        final fetchedShops = jsonList.map((json) => Shop.fromJson(json)).toList();
-
-        if (mounted) {
-          setState(() {
-            _shops = fetchedShops;
-            _isLoading = false;
-            _updateMarkers();
-          });
-        }
-      } else {
-        if (mounted) setState(() => _isLoading = false);
+      final fetchedShops = await ApiService.getShops();
+      if (mounted) {
+        setState(() {
+          _shops = fetchedShops;
+          _isLoading = false;
+          _updateMarkers();
+        });
       }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
@@ -217,12 +201,26 @@ class MapState extends State<Map> {
                         border: Border.all(color: const Color(0xFFE1EBE0)),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Image.network(
-                        shop.image,
+                      child: CachedNetworkImage(
+                        imageUrl: shop.image,
                         width: double.infinity,
                         height: 160,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        placeholder: (context, url) => Container(
+                          height: 160,
+                          color: const Color(0xFFF5F8F2),
+                          child: const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Color(0xFF8CB83E),
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
                           height: 120,
                           color: const Color(0xFFF5F8F2),
                           child: const Center(
