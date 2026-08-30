@@ -12,7 +12,8 @@ import 'dart:math' show cos, sqrt, asin;
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
   var p = 0.017453292519943295;
   var c = cos;
-  var a = 0.5 -
+  var a =
+      0.5 -
       c((lat2 - lat1) * p) / 2 +
       c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
   return 12742 * asin(sqrt(a));
@@ -24,7 +25,6 @@ class Map extends StatefulWidget {
   @override
   State<Map> createState() => MapState();
 }
-
 
 class MapState extends State<Map> {
   final Completer<GoogleMapController> _controller =
@@ -86,7 +86,7 @@ class MapState extends State<Map> {
     _markers = _shops.expand((shop) {
       final isSelected = _selectedShopId == null || shop.id == _selectedShopId;
       final isHighlighted = shop.id == _selectedShopId;
-      
+
       int i = 0;
       return shop.locations.map((loc) {
         final id = '${shop.id}_$i';
@@ -149,7 +149,9 @@ class MapState extends State<Map> {
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -157,7 +159,10 @@ class MapState extends State<Map> {
               children: [
                 // Header badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEFF7E1),
                     borderRadius: BorderRadius.circular(20),
@@ -165,7 +170,11 @@ class MapState extends State<Map> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.storefront, color: Color(0xFF1E4D2B), size: 14),
+                      Icon(
+                        Icons.storefront,
+                        color: Color(0xFF1E4D2B),
+                        size: 14,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Ponto Oficial da Festa',
@@ -224,7 +233,11 @@ class MapState extends State<Map> {
                           height: 120,
                           color: const Color(0xFFF5F8F2),
                           child: const Center(
-                            child: Icon(Icons.storefront, size: 40, color: Color(0xFF8CB83E)),
+                            child: Icon(
+                              Icons.storefront,
+                              size: 40,
+                              color: Color(0xFF8CB83E),
+                            ),
                           ),
                         ),
                       ),
@@ -239,14 +252,21 @@ class MapState extends State<Map> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Center(
-                      child: Icon(Icons.storefront, size: 40, color: Color(0xFF8CB83E)),
+                      child: Icon(
+                        Icons.storefront,
+                        size: 40,
+                        color: Color(0xFF8CB83E),
+                      ),
                     ),
                   ),
                 const SizedBox(height: 12),
 
                 // Coordinates Tag
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF5F8F2),
                     borderRadius: BorderRadius.circular(8),
@@ -278,7 +298,10 @@ class MapState extends State<Map> {
                     ),
                     child: const Text(
                       'Fechar',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -296,7 +319,7 @@ class MapState extends State<Map> {
       _searchController?.clear();
       if (mounted) FocusScope.of(context).unfocus();
     });
-    
+
     if (product.shopId != null && product.shopId!.isNotEmpty) {
       try {
         final shop = _shops.firstWhere((s) => s.id == product.shopId);
@@ -308,14 +331,25 @@ class MapState extends State<Map> {
 
         Future.delayed(const Duration(milliseconds: 250), () async {
           final GoogleMapController controller = await _controller.future;
-          Location targetLoc = shop.locations.isNotEmpty ? shop.locations[0] : Location(latitude: 0, longitude: 0);
+          Location targetLoc = shop.locations.isNotEmpty
+              ? shop.locations[0]
+              : Location(latitude: 0, longitude: 0);
 
           if (shop.locations.length > 1 && _locationPermissionGranted) {
             try {
-              Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+              Position position = await Geolocator.getCurrentPosition(
+                locationSettings: const LocationSettings(
+                  accuracy: LocationAccuracy.high,
+                ),
+              );
               double minDistance = double.infinity;
               for (var loc in shop.locations) {
-                double distance = calculateDistance(position.latitude, position.longitude, loc.latitude, loc.longitude);
+                double distance = calculateDistance(
+                  position.latitude,
+                  position.longitude,
+                  loc.latitude,
+                  loc.longitude,
+                );
                 if (distance < minDistance) {
                   minDistance = distance;
                   targetLoc = loc;
@@ -340,19 +374,22 @@ class MapState extends State<Map> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Barraca não encontrada para este produto.')),
+            const SnackBar(
+              content: Text('Barraca não encontrada para este produto.'),
+            ),
           );
         }
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Este produto não está associado a nenhuma barraca.')),
+          const SnackBar(
+            content: Text('Este produto não está associado a nenhuma barraca.'),
+          ),
         );
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +427,10 @@ class MapState extends State<Map> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(18),
@@ -411,7 +451,11 @@ class MapState extends State<Map> {
                             color: const Color(0xFF8CB83E),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.pin_drop, color: Color(0xFF13301A), size: 18),
+                          child: const Icon(
+                            Icons.pin_drop,
+                            color: Color(0xFF13301A),
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -429,8 +473,8 @@ class MapState extends State<Map> {
                               ),
                               Text(
                                 _isLoading
-                                  ? 'Carregando barracas...'
-                                  : '${_shops.length} barracas • Toque no marcador para detalhes',
+                                    ? 'Carregando barracas...'
+                                    : '${_shops.length} barracas • Toque no marcador para detalhes',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: Color(0xFF566755),
@@ -464,50 +508,62 @@ class MapState extends State<Map> {
                           return const Iterable<Product>.empty();
                         }
                         return _products.where((Product product) {
-                          return product.name
-                              .toLowerCase()
-                              .contains(textEditingValue.text.toLowerCase());
+                          return product.name.toLowerCase().contains(
+                            textEditingValue.text.toLowerCase(),
+                          );
                         });
                       },
                       onSelected: _onProductSelected,
-                      fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                        _searchController = controller;
-                        
-                        void executeSearch(String value) {
-                          if (value.isNotEmpty) {
-                            final matches = _products.where((p) => 
-                                p.name.toLowerCase().contains(value.toLowerCase()));
-                            if (matches.isNotEmpty) {
-                              _onProductSelected(matches.first);
-                              onEditingComplete();
-                            }
-                          }
-                        }
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onEditingComplete) {
+                            _searchController = controller;
 
-                        return TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          textInputAction: TextInputAction.search,
-                          onEditingComplete: () {
-                            onEditingComplete();
-                            executeSearch(controller.text);
+                            void executeSearch(String value) {
+                              if (value.isNotEmpty) {
+                                final matches = _products.where(
+                                  (p) => p.name.toLowerCase().contains(
+                                    value.toLowerCase(),
+                                  ),
+                                );
+                                if (matches.isNotEmpty) {
+                                  _onProductSelected(matches.first);
+                                  onEditingComplete();
+                                }
+                              }
+                            }
+
+                            return TextField(
+                              controller: controller,
+                              focusNode: focusNode,
+                              textInputAction: TextInputAction.search,
+                              onEditingComplete: () {
+                                onEditingComplete();
+                                executeSearch(controller.text);
+                              },
+                              onSubmitted: executeSearch,
+                              decoration: InputDecoration(
+                                hintText: 'Pesquisar produto...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF566755),
+                                ),
+                                prefixIcon: IconButton(
+                                  icon: const Icon(
+                                    Icons.search,
+                                    color: Color(0xFF1E4D2B),
+                                  ),
+                                  onPressed: () =>
+                                      executeSearch(controller.text),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                              ),
+                            );
                           },
-                          onSubmitted: executeSearch,
-                          decoration: InputDecoration(
-                            hintText: 'Pesquisar produto...',
-                            hintStyle: const TextStyle(color: Color(0xFF566755)),
-                            prefixIcon: IconButton(
-                              icon: const Icon(Icons.search, color: Color(0xFF1E4D2B)),
-                              onPressed: () => executeSearch(controller.text),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                        );
-                      },
                       optionsViewBuilder: (context, onSelected, options) {
                         return Align(
                           alignment: Alignment.topLeft,
@@ -519,17 +575,22 @@ class MapState extends State<Map> {
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
                                 maxHeight: 200,
-                                maxWidth: MediaQuery.of(context).size.width - 24,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width - 24,
                               ),
                               child: ListView.builder(
                                 padding: EdgeInsets.zero,
                                 shrinkWrap: true,
                                 itemCount: options.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  final Product option = options.elementAt(index);
+                                  final Product option = options.elementAt(
+                                    index,
+                                  );
                                   return ListTile(
                                     title: Text(option.name),
-                                    subtitle: Text('R\$ ${option.price.toStringAsFixed(2)}'),
+                                    subtitle: Text(
+                                      'R\$ ${option.price.toStringAsFixed(2)}',
+                                    ),
                                     onTap: () {
                                       onSelected(option);
                                     },
@@ -551,4 +612,3 @@ class MapState extends State<Map> {
     );
   }
 }
-

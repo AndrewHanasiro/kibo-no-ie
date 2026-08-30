@@ -49,7 +49,10 @@ export default function Produtos() {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
+    const load = async () => {
+      await fetchProducts();
+    };
+    load();
   }, [fetchProducts]);
 
   const updateTotal = (productToUpdate: Product, isAdding: boolean) => {

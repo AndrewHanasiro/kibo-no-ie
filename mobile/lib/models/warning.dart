@@ -3,11 +3,7 @@ class Warning {
   final String text;
   final DateTime timestamp;
 
-  Warning({
-    required this.id,
-    required this.text,
-    required this.timestamp,
-  });
+  Warning({required this.id, required this.text, required this.timestamp});
 
   factory Warning.fromJson(Map<String, dynamic> json) {
     return Warning(

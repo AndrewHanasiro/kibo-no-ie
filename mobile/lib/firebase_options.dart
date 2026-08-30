@@ -64,7 +64,8 @@ class DefaultFirebaseOptions {
     projectId: 'kibo-no-ie',
     databaseURL: 'https://kibo-no-ie-default-rtdb.firebaseio.com',
     storageBucket: 'kibo-no-ie.firebasestorage.app',
-    iosClientId: '394140065481-21rfgbja65kecigqdrc3qupi8re6ulb8.apps.googleusercontent.com',
+    iosClientId:
+        '394140065481-21rfgbja65kecigqdrc3qupi8re6ulb8.apps.googleusercontent.com',
     iosBundleId: 'com.example.kiboNoIe',
   );
 }

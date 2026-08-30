@@ -88,7 +88,10 @@ const useWarnings = () => {
   };
 
   useEffect(() => {
-    fetchWarnings();
+    const load = async () => {
+      await fetchWarnings();
+    };
+    load();
   }, [fetchWarnings]);
 
   return { warnings, loading, error, refetch: fetchWarnings, deleteWarning, createWarning };

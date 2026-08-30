@@ -39,7 +39,11 @@ class _WarningBoardState extends State<WarningBoard> {
                 color: const Color(0xFF8CB83E),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.campaign, color: Color(0xFF13301A), size: 18),
+              child: const Icon(
+                Icons.campaign,
+                color: Color(0xFF13301A),
+                size: 18,
+              ),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -76,7 +80,9 @@ class _WarningBoardState extends State<WarningBoard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CB83E)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF8CB83E),
+                    ),
                   ),
                   SizedBox(height: 12),
                   Text(
@@ -97,12 +103,19 @@ class _WarningBoardState extends State<WarningBoard> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Color(0xFFD32F2F)),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Color(0xFFD32F2F),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Erro ao carregar avisos: ${snapshot.error}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF566755), fontSize: 13),
+                      style: const TextStyle(
+                        color: Color(0xFF566755),
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
@@ -132,7 +145,11 @@ class _WarningBoardState extends State<WarningBoard> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.mark_chat_read_outlined, size: 56, color: Color(0xFF8CB83E)),
+                    Icon(
+                      Icons.mark_chat_read_outlined,
+                      size: 56,
+                      color: Color(0xFF8CB83E),
+                    ),
                     SizedBox(height: 16),
                     Text(
                       'Nenhum comunicado no momento',
@@ -161,10 +178,7 @@ class _WarningBoardState extends State<WarningBoard> {
             itemCount: warningList.length,
             itemBuilder: (context, index) {
               final warning = warningList[index];
-              return WarningItemTile(
-                warning: warning,
-                index: index,
-              );
+              return WarningItemTile(warning: warning, index: index);
             },
           );
         },
@@ -209,7 +223,9 @@ class WarningItemTile extends StatelessWidget {
               // Left Green Accent Bar
               Container(
                 width: 6,
-                color: index == 0 ? const Color(0xFF8CB83E) : const Color(0xFF1E4D2B),
+                color: index == 0
+                    ? const Color(0xFF8CB83E)
+                    : const Color(0xFF1E4D2B),
               ),
 
               // Content
@@ -263,7 +279,10 @@ class WarningItemTile extends StatelessWidget {
                                 ),
                                 if (index == 0)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 1.5,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF8CB83E),
                                       borderRadius: BorderRadius.circular(6),
@@ -303,4 +322,3 @@ class WarningItemTile extends StatelessWidget {
     );
   }
 }
-

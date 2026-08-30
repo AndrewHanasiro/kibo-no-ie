@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "eslint --ext .js,.ts .",
+    "lint": "eslint . --fix",
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "build:watch": "tsc --watch",

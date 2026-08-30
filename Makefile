@@ -1,4 +1,4 @@
-.PHONY: dev backend admin mobile visitante deploy
+.PHONY: dev backend admin mobile visitante deploy check
 
 # Inicia o backend, admin e visitante simultaneamente
 dev:
@@ -33,3 +33,14 @@ visitante:
 deploy:
 	@echo "🚀 Iniciando deploy..."
 	./deploy.sh
+
+# Executa lint, format e build check em todos os projetos
+check:
+	@echo "🔍 Verificando Backend..."
+	cd backend && npm run lint && npm run build:check
+	@echo "🔍 Verificando Admin..."
+	cd admin && npm run lint && npx tsc --noEmit
+	@echo "🔍 Verificando Visitante..."
+	cd visitante && npm run lint && npx tsc -b
+	@echo "🔍 Verificando Mobile..."
+	cd mobile && dart format . && flutter analyze

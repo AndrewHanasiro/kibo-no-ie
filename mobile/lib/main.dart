@@ -19,22 +19,22 @@ void main() async {
 
   // Configure Firebase Cloud Messaging
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  
+
   // Request permissions for iOS and newer Android versions
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
-  print('User granted permission: ${settings.authorizationStatus}');
+  debugPrint('User granted permission: ${settings.authorizationStatus}');
 
   // Subscribe to the "warnings" topic to receive official warnings
   await messaging.subscribeToTopic('warnings');
-  print('Subscribed to warnings topic');
+  debugPrint('Subscribed to warnings topic');
 
   // Listen for foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Received foreground message: ${message.notification?.title}');
+    debugPrint('Received foreground message: ${message.notification?.title}');
     // Here you could show a local notification or an in-app banner if desired.
   });
 
@@ -124,7 +124,8 @@ class NavigationExample extends StatefulWidget {
 }
 
 class _NavigationExampleState extends State<NavigationExample> {
-  int currentPageIndex = 1; // Default to Market (Food/Drinks) for quick guest ordering
+  int currentPageIndex =
+      1; // Default to Market (Food/Drinks) for quick guest ordering
 
   @override
   Widget build(BuildContext context) {
@@ -173,4 +174,3 @@ class _NavigationExampleState extends State<NavigationExample> {
     );
   }
 }
-

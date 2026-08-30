@@ -36,7 +36,10 @@ export default function Avisos() {
   }, []);
 
   useEffect(() => {
-    fetchWarnings();
+    const load = async () => {
+      await fetchWarnings();
+    };
+    load();
   }, [fetchWarnings]);
 
   const formatDate = (isoString: string) => {

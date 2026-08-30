@@ -38,7 +38,10 @@ const useProducts = () => {
   }, []);
 
   useEffect(() => {
-    fetchProdutos();
+    const load = async () => {
+      await fetchProdutos();
+    };
+    load();
   }, [fetchProdutos]);
 
   return { products, loading, error, refetch: fetchProdutos };

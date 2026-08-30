@@ -15,7 +15,11 @@ export const validateAuth = async (request: https.Request): Promise<boolean> => 
   }
   const idToken = authorization.split("Bearer ")[1];
   try {
-    await auth.verifyIdToken(idToken);
+    const decodedToken = await auth.verifyIdToken(idToken);
+    if (decodedToken.admin !== true) {
+      logger.warn(`User ${decodedToken.uid} attempted access without admin claim`);
+      return false;
+    }
     return true;
   } catch (error) {
     logger.error("Auth validation failed", error);

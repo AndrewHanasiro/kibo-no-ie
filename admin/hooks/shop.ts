@@ -37,7 +37,10 @@ const useShops = () => {
   }, []);
 
   useEffect(() => {
-    fetchShops();
+    const load = async () => {
+      await fetchShops();
+    };
+    load();
   }, [fetchShops]);
 
   return { shops, loading, error, refetch: fetchShops };

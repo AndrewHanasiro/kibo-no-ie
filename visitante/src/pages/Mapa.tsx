@@ -94,9 +94,11 @@ function MapaInner() {
   }, []);
 
   useEffect(() => {
-    Promise.all([fetchShops(), fetchProducts()]).finally(() => {
+    const load = async () => {
+      await Promise.all([fetchShops(), fetchProducts()]);
       setIsLoading(false);
-    });
+    };
+    load();
   }, [fetchShops, fetchProducts]);
 
   const handleShopSelect = useCallback((shop: Shop, loc?: Location) => {

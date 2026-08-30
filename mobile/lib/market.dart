@@ -28,7 +28,8 @@ class _MarketState extends State<Market> {
     if (mounted) {
       setState(() {
         _allProducts = products;
-        _categories = ['Todos'] + products.map((p) => p.category).toSet().toList();
+        _categories =
+            ['Todos'] + products.map((p) => p.category).toSet().toList();
       });
     }
     return products;
@@ -105,7 +106,9 @@ class _MarketState extends State<Market> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CB83E)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF8CB83E),
+                    ),
                   ),
                   SizedBox(height: 12),
                   Text(
@@ -126,12 +129,19 @@ class _MarketState extends State<Market> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.wifi_off, size: 48, color: Color(0xFFD32F2F)),
+                    const Icon(
+                      Icons.wifi_off,
+                      size: 48,
+                      color: Color(0xFFD32F2F),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Erro ao carregar cardápio: ${snapshot.error}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF566755), fontSize: 13),
+                      style: const TextStyle(
+                        color: Color(0xFF566755),
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
@@ -165,7 +175,9 @@ class _MarketState extends State<Market> {
 
           final displayedProducts = _selectedCategory == 'Todos'
               ? _allProducts
-              : _allProducts.where((p) => p.category == _selectedCategory).toList();
+              : _allProducts
+                    .where((p) => p.category == _selectedCategory)
+                    .toList();
 
           return Column(
             children: [
@@ -173,7 +185,10 @@ class _MarketState extends State<Market> {
               if (_categories.isNotEmpty)
                 Container(
                   height: 56,
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                    horizontal: 8.0,
+                  ),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: _categories.length,
@@ -188,8 +203,12 @@ class _MarketState extends State<Market> {
                             category,
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                              color: isSelected ? const Color(0xFF13301A) : const Color(0xFF566755),
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? const Color(0xFF13301A)
+                                  : const Color(0xFF566755),
                             ),
                           ),
                           selected: isSelected,
@@ -205,7 +224,9 @@ class _MarketState extends State<Market> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                             side: BorderSide(
-                              color: isSelected ? const Color(0xFF8CB83E) : const Color(0xFFE1EBE0),
+                              color: isSelected
+                                  ? const Color(0xFF8CB83E)
+                                  : const Color(0xFFE1EBE0),
                               width: 1,
                             ),
                           ),
@@ -218,7 +239,10 @@ class _MarketState extends State<Market> {
               // Product List
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   itemCount: displayedProducts.length,
                   itemBuilder: (context, index) {
                     final product = displayedProducts[index];
@@ -250,7 +274,10 @@ class _MarketState extends State<Market> {
                 child: SafeArea(
                   top: false,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFF1E4D2B), Color(0xFF2E6B3E)],
@@ -379,14 +406,19 @@ class ProductItemTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: isAvailable ? const Color(0xFF1B261D) : Colors.grey.shade500,
+                      color: isAvailable
+                          ? const Color(0xFF1B261D)
+                          : Colors.grey.shade500,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFEFF7E1),
                           borderRadius: BorderRadius.circular(8),
@@ -488,7 +520,10 @@ class ProductItemTile extends StatelessWidget {
               )
             else
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
@@ -508,4 +543,3 @@ class ProductItemTile extends StatelessWidget {
     );
   }
 }
-

@@ -29,7 +29,8 @@ class Shop {
     return Shop(
       id: json['id'] as String,
       name: json['name'] as String,
-      locations: (json['locations'] as List<dynamic>?)
+      locations:
+          (json['locations'] as List<dynamic>?)
               ?.map((e) => Location.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],

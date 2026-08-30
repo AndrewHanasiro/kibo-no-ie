@@ -20,7 +20,7 @@ export const listWarning = onRequest({ cors: true }, async (request, response) =
     const snapshot = await db.ref("warnings").once("value");
     const data = snapshot.val() satisfies Record<string, Warning>;
 
-    response.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+    response.set("Cache-Control", "public, max-age=300, s-maxage=600");
 
     if (!data) {
       response.status(200).json([]);
@@ -58,13 +58,27 @@ export const createWarning = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { text } = request.body;
-  if (!text) {
+  const rawText = request.body.text;
+  if (!rawText || typeof rawText !== "string") {
     response
       .status(400)
       .send("Missing required fields: text");
     return;
   }
+  
+  if (rawText.length > 500) {
+    response.status(400).send("Text exceeds maximum length of 500 characters");
+    return;
+  }
+  
+  // Basic HTML escaping
+  const text = rawText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
   try {
     const warningsRef = db.ref("warnings");
     const newWarningRef = warningsRef.push();
@@ -74,6 +88,7 @@ export const createWarning = onRequest({ cors: true }, async (request, response)
     });
     
     // Send push notification to all users subscribed to "warnings"
+    let pushFailed = false;
     try {
       await getMessaging().send({
         topic: "warnings",
@@ -85,11 +100,13 @@ export const createWarning = onRequest({ cors: true }, async (request, response)
       logger.info("Push notification sent to warnings topic.");
     } catch (messagingError) {
       logger.error("Error sending push notification", messagingError);
+      pushFailed = true;
     }
 
     response.status(201).json({
-      message: "Warning created successfully",
+      message: pushFailed ? "Warning created but push notification failed" : "Warning created successfully",
       id: newWarningRef.key,
+      partialFailure: pushFailed,
     });
   } catch (error) {
     logger.error("Error creating warning", error);
