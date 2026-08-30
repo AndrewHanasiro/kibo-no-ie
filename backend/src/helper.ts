@@ -29,10 +29,19 @@ export const uploadToStorage = async (image: string): Promise<string> => {
     throw new Error("Invalid image format");
   }
   const contentType = metadata.split(":")[1];
+  
+  if (!contentType.startsWith("image/")) {
+    throw new Error("Invalid file type. Only images are allowed.");
+  }
+  
+  const allowedExtensions = ["jpeg", "jpg", "png", "webp", "gif"];
+  const fileExtension = contentType.split("/")[1] || "jpeg";
+  if (!allowedExtensions.includes(fileExtension)) {
+    throw new Error("Unsupported image format.");
+  }
+
   const imageBuffer = Buffer.from(base64EncodedImageString, "base64");
 
-  // Generate a unique filename and path in Firebase Storage
-  const fileExtension = contentType.split("/")[1] || "jpeg";
   const filename = `shops/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;
   const file = bucket.file(filename);
 

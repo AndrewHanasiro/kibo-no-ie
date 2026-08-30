@@ -19,6 +19,9 @@ export const listWarning = onRequest({ cors: true }, async (request, response) =
   try {
     const snapshot = await db.ref("warnings").once("value");
     const data = snapshot.val() satisfies Record<string, Warning>;
+
+    response.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+
     if (!data) {
       response.status(200).json([]);
       return;
