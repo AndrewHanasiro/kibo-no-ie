@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { MapPin, Utensils, Megaphone, HeartHandshake } from 'lucide-react';
+import { MapPin, Utensils, Megaphone } from 'lucide-react';
 import Produtos from './pages/Produtos';
 import Mapa from './pages/Mapa';
 import Avisos from './pages/Avisos';
@@ -7,17 +7,12 @@ import Avisos from './pages/Avisos';
 function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-kibo-bg p-4 relative overflow-hidden">
-      {/* Decorative background circle */}
       <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-secondary-leaf opacity-10 rounded-full blur-3xl"></div>
 
       <header className="text-center mb-10 relative z-10">
         <div className="flex justify-center mb-4">
-          <div className="bg-primary-forest p-4 rounded-full shadow-lg">
-            <HeartHandshake size={40} className="text-white" />
-          </div>
+          <img src="/festival-logo.png" alt="Logo Kibô-no-Iê" className="w-46 h-auto" />
         </div>
-        <h1 className="text-4xl font-bold text-primary-forest mb-2 tracking-tight">46ª Festa do Verde </h1>
-        <p className="text-secondary-leaf font-bold text-lg">Guia do Visitante</p>
       </header>
 
       <main className="w-full max-w-md space-y-4 relative z-10">
@@ -57,6 +52,39 @@ function Home() {
               <span className="text-lg">Quadro de Avisos</span>
             </Link>
           </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center mt-12 w-full text-[#566755]">
+          
+          <div className="w-full mb-8">
+            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Platinum</p>
+            <div className="flex justify-center items-center w-full">
+              <img src="/auth-plus-logo.png" alt="Sponsor Platinum" className="h-20 w-auto object-contain" />
+              <img src="/kibo-no-ie_logo.png" alt="Sponsor Platinum" className="h-20 w-auto object-contain" />
+            </div>
+          </div>
+
+          <div className="w-full">
+            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Master</p>
+            <div className="flex flex-wrap justify-center items-center gap-y-6 w-full">
+              <div className="flex justify-center basis-1/3 px-2">
+                <img src="/auth-plus-logo.png" alt="Sponsor Master 1" className="h-12 w-auto object-contain opacity-90" />
+              </div>
+              <div className="flex justify-center basis-1/3 px-2">
+                <img src="/auth-plus-logo.png" alt="Sponsor Master 2" className="h-12 w-auto object-contain opacity-90" />
+              </div>
+              <div className="flex justify-center basis-1/3 px-2">
+                <img src="/auth-plus-logo.png" alt="Sponsor Master 3" className="h-12 w-auto object-contain opacity-90" />
+              </div>
+              <div className="flex justify-center basis-1/3 px-2">
+                <img src="/auth-plus-logo.png" alt="Sponsor Master 4" className="h-12 w-auto object-contain opacity-90" />
+              </div>
+              <div className="flex justify-center basis-1/3 px-2">
+                <img src="/auth-plus-logo.png" alt="Sponsor Master 5" className="h-12 w-auto object-contain opacity-90" />
+              </div>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
