@@ -46,7 +46,7 @@ export default function AvisosPage() {
       {/* Create Warning Form */}
       <div className="bg-white rounded-3xl p-6 border border-[#e1ebe0] shadow-sm">
         <h2 className="text-lg font-bold text-[#1b261d] mb-4">Novo Aviso</h2>
-        <form onSubmit={handleCreate} className="flex gap-4">
+        <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-4">
           <input
             type="text"
             placeholder="Digite o texto do aviso..."
@@ -57,7 +57,7 @@ export default function AvisosPage() {
           <button
             type="submit"
             disabled={isSubmitting || !newWarningText.trim()}
-            className="px-6 py-3 bg-[#1e4d2b] hover:bg-[#163d21] disabled:bg-[#1e4d2b]/50 text-white font-bold text-sm rounded-2xl transition-all shadow-sm flex items-center justify-center min-w-[120px]"
+            className="px-6 py-3 bg-[#1e4d2b] hover:bg-[#163d21] disabled:bg-[#1e4d2b]/50 text-white font-bold text-sm rounded-2xl transition-all shadow-sm flex items-center justify-center sm:min-w-[120px]"
           >
             {isSubmitting ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />

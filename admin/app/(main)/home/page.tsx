@@ -9,7 +9,8 @@ import Link from "next/link";
 
 const containerStyle = {
   width: "100%",
-  height: "calc(100vh - 200px)",
+  height: "calc(100vh - 250px)",
+  minHeight: "400px",
   borderRadius: "1.25rem",
 };
 

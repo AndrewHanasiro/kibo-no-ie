@@ -145,9 +145,9 @@ export default function ProdutosPage() {
                 {categoryProducts?.map((p) => (
                   <div
                     key={p.id}
-                    className="p-5 bg-white border border-[#e1ebe0] rounded-2xl shadow-sm hover:shadow-md transition-all flex justify-between items-center group hover:border-[#8cb83e]/50"
+                    className="p-5 bg-white border border-[#e1ebe0] rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:border-[#8cb83e]/50"
                   >
-                    <div className="space-y-1.5 pr-3">
+                    <div className="space-y-1.5 pr-3 w-full sm:w-auto">
                       <p className="text-base font-bold text-[#1b261d] group-hover:text-[#1e4d2b] transition-colors">
                         {p.name}
                       </p>
@@ -166,8 +166,8 @@ export default function ProdutosPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                      <div className="text-left sm:text-right">
                         <span className="block text-xs text-[#7b8e79] font-medium">Preço</span>
                         <span className="text-lg font-extrabold text-[#1e4d2b]">
                           R$ {p.price.toFixed(2)}
@@ -178,7 +178,7 @@ export default function ProdutosPage() {
                           setSelectedProduct(p);
                           setIsModalOpen(true);
                         }}
-                        className="px-3.5 py-2 text-xs font-bold bg-[#f5f8f2] hover:bg-[#8cb83e] text-[#1e4d2b] hover:text-[#13301a] border border-[#d2dfd0] rounded-xl transition-all shadow-sm cursor-pointer"
+                        className="px-3.5 py-2 text-xs font-bold bg-[#f5f8f2] hover:bg-[#8cb83e] text-[#1e4d2b] hover:text-[#13301a] border border-[#d2dfd0] rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap"
                       >
                         Editar ✏️
                       </button>

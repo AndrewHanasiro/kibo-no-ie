@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const LoginPage = () => {
   const { user, loading, login } = useAuth();
@@ -49,16 +50,16 @@ const LoginPage = () => {
 
       <div className="w-full max-w-md bg-white shadow-xl rounded-3xl p-8 sm:p-10 border border-[#e1ebe0] relative z-10">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#eff7e1] border-2 border-[#8cb83e] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <span className="text-3xl">🌳</span>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="relative w-48 h-16 sm:w-56 sm:h-20 mb-2">
+            <Image
+              src="/festival-logo.png"
+              alt="Logo Kibô-no-Iê 46ª Festa do Verde"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
-          <span className="inline-block px-3 py-1 bg-[#8cb83e]/20 text-[#1e4d2b] font-bold text-xs rounded-full uppercase tracking-wider mb-2">
-            46ª Festa do Verde
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1b261d] tracking-tight">
-            Kibô-no-Iê
-          </h1>
           <p className="text-sm text-[#566755] mt-1 font-medium">
             Painel de Gestão & Administração
           </p>

@@ -210,7 +210,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
             )}
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
