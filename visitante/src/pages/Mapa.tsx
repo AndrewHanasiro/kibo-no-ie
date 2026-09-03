@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, useMap } from '@vis.gl/react-google-maps';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, MapPin, Search, Store } from 'lucide-react';
+import { ChevronLeft, MapPin, Search, Store, LocateFixed } from 'lucide-react';
 import type { Shop, Location } from '../types/shop';
 import type { Product } from '../types/product';
 
@@ -69,6 +69,59 @@ function MapaInner() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
+  // User location state
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Rastrear localização do usuário em tempo real
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      (err) => {
+        console.warn('Erro ao obter localização do usuário:', err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  const handleCenterUserLocation = useCallback(() => {
+    if (userLocation && map) {
+      map.panTo(userLocation);
+      map.setZoom(19.5);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLocation(loc);
+          if (map) {
+            map.panTo(loc);
+            map.setZoom(19.5);
+          }
+        },
+        () => {
+          setSearchError('Não foi possível obter sua localização atual.');
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      setSearchError('Geolocalização não suportada neste dispositivo.');
+    }
+  }, [userLocation, map]);
+
   const fetchShops = useCallback(async () => {
     try {
       const res = await fetch(SHOP_URL);
@@ -108,7 +161,7 @@ function MapaInner() {
     if (map) {
       const targetLoc = loc || (shop.locations && shop.locations[0]);
       if (targetLoc) {
-        map.panTo({ lat: targetLoc.latitude, lng: targetLoc.longitude });
+        map.panTo({ lat: Number(targetLoc.latitude), lng: Number(targetLoc.longitude) });
         map.setZoom(19.5);
       }
     }
@@ -121,37 +174,45 @@ function MapaInner() {
     if (product.shopId) {
       const shop = shops.find(s => s.id === product.shopId);
       if (shop) {
-        if (shop.locations && shop.locations.length > 1 && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const userLat = pos.coords.latitude;
-              const userLng = pos.coords.longitude;
-              const closest = shop.locations.reduce((prev, curr) => {
-                const prevDist = calculateDistance(userLat, userLng, prev.latitude, prev.longitude);
-                const currDist = calculateDistance(userLat, userLng, curr.latitude, curr.longitude);
-                return currDist < prevDist ? curr : prev;
-              });
-              handleShopSelect(shop, closest);
-            },
-            () => {
-              handleShopSelect(shop, shop.locations[0]);
-            }
-          );
-        } else {
-          handleShopSelect(shop, shop.locations ? shop.locations[0] : undefined);
+        let targetLoc = shop.locations && shop.locations.length > 0 ? shop.locations[0] : undefined;
+        if (shop.locations && shop.locations.length > 1 && userLocation) {
+          targetLoc = shop.locations.reduce((prev, curr) => {
+            const prevDist = calculateDistance(userLocation.lat, userLocation.lng, prev.latitude, prev.longitude);
+            const currDist = calculateDistance(userLocation.lat, userLocation.lng, curr.latitude, curr.longitude);
+            return currDist < prevDist ? curr : prev;
+          });
         }
+        handleShopSelect(shop, targetLoc);
       } else {
         setSearchError('Barraca não encontrada para este produto.');
       }
     } else {
       setSearchError('Este produto não está associado a nenhuma barraca.');
     }
-  }, [shops, handleShopSelect]);
+  }, [shops, userLocation, handleShopSelect]);
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return [];
     return products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [searchQuery, products]);
+
+  const filteredShops = useMemo(() => {
+    if (!searchQuery) return [];
+    return shops.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [searchQuery, shops]);
+
+  const handleSearchSubmit = useCallback(() => {
+    const firstProduct = filteredProducts[0];
+    const firstShop = filteredShops[0];
+
+    if (firstProduct) {
+      handleProductSelect(firstProduct);
+    } else if (firstShop) {
+      handleShopSelect(firstShop);
+      setSearchQuery(firstShop.name);
+      setShowDropdown(false);
+    }
+  }, [filteredProducts, filteredShops, handleProductSelect, handleShopSelect]);
 
   // Handle outside click for autocomplete
   useEffect(() => {
@@ -193,16 +254,30 @@ function MapaInner() {
           <div className="px-4 mt-4 flex flex-col gap-3 max-w-lg mx-auto pointer-events-auto">
             <div className="relative">
               <div className="bg-white/90 backdrop-blur rounded-2xl border border-[#E1EBE0] shadow-sm flex items-center px-4 py-3">
-                <Search size={20} className="text-primary-forest mr-3" />
+                <button
+                  type="button"
+                  onClick={handleSearchSubmit}
+                  className="text-primary-forest mr-3 cursor-pointer hover:opacity-75"
+                  title="Buscar"
+                >
+                  <Search size={20} />
+                </button>
                 <input
                   type="text"
-                  placeholder="Pesquisar produto..."
+                  placeholder="Pesquisar produto ou barraca..."
                   className="flex-1 bg-transparent border-none outline-none text-[#1B261D] placeholder:text-[#566755] text-sm"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setShowDropdown(true);
                     setSearchError(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearchSubmit();
+                      (e.target as HTMLInputElement).blur();
+                    }
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -211,15 +286,35 @@ function MapaInner() {
                 />
               </div>
 
-              {showDropdown && filteredProducts.length > 0 && (
+              {showDropdown && (filteredProducts.length > 0 || filteredShops.length > 0) && (
                 <div
-                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-lg border border-[#E1EBE0] overflow-hidden max-h-60 overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-lg border border-[#E1EBE0] overflow-hidden max-h-64 overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {filteredShops.map(shop => (
+                    <button
+                      key={`shop-${shop.id}`}
+                      className="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex items-center justify-between transition-colors cursor-pointer"
+                      onClick={() => {
+                        handleShopSelect(shop);
+                        setSearchQuery(shop.name);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Store size={16} className="text-primary-forest" />
+                        <span className="text-sm font-bold text-[#1B261D]">{shop.name}</span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-primary-forest bg-[#EFF7E1] px-2 py-0.5 rounded-full">
+                        Barraca
+                      </span>
+                    </button>
+                  ))}
+
                   {filteredProducts.map(product => (
                     <button
                       key={product.id}
-                      className="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex flex-col transition-colors"
+                      className="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex flex-col transition-colors cursor-pointer"
                       onClick={() => handleProductSelect(product)}
                     >
                       <span className="text-sm font-bold text-[#1B261D]">{product.name}</span>
@@ -265,14 +360,40 @@ function MapaInner() {
                   style={{ opacity: isSelected ? 1.0 : 0.4 }}
                 >
                   <Pin
-                    background={isHighlighted ? '#1e4d2b' : '#E53935'}
-                    borderColor={isHighlighted ? '#13301A' : '#B71C1C'}
+                    background={isHighlighted ? '#2563EB' : '#E53935'}
+                    borderColor={isHighlighted ? '#1D4ED8' : '#B71C1C'}
                     glyphColor={'#ffffff'}
                   />
                 </AdvancedMarker>
               ));
             })}
+
+            {/* Marcador da localização atual do usuário */}
+            {userLocation && (
+              <AdvancedMarker
+                position={userLocation}
+                title="Sua localização atual"
+                zIndex={999}
+              >
+                <div className="relative flex items-center justify-center">
+                  <span className="absolute animate-ping inline-flex h-7 w-7 rounded-full bg-blue-500 opacity-75 pointer-events-none" />
+                  <span className="relative inline-flex items-center justify-center h-6 w-6 rounded-full bg-white shadow-md border-2 border-white">
+                    <span className="h-3.5 w-3.5 rounded-full bg-[#1A73E8]" />
+                  </span>
+                </div>
+              </AdvancedMarker>
+            )}
           </Map>
+
+          {/* Botão para centralizar na posição do usuário */}
+          <button
+            onClick={handleCenterUserLocation}
+            className="absolute bottom-6 right-4 z-20 bg-white/95 hover:bg-white text-primary-forest p-3 rounded-full shadow-lg border border-[#E1EBE0] transition-transform active:scale-95 flex items-center justify-center cursor-pointer"
+            title="Minha localização"
+            aria-label="Minha localização"
+          >
+            <LocateFixed size={22} className={userLocation ? "text-blue-600" : "text-primary-forest"} />
+          </button>
         </div>
 
         {/* Shop Details Modal (Bottom Sheet style) */}
