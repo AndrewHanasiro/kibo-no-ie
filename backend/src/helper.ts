@@ -9,17 +9,16 @@ const bucket = getStorage().bucket();
  * Helper to validate Firebase ID Tokens
  */
 export const validateAuth = async (request: https.Request): Promise<boolean> => {
+  if (request.method === "OPTIONS") {
+    return true;
+  }
   const authorization = request.get("Authorization");
   if (!authorization || !authorization.startsWith("Bearer ")) {
     return false;
   }
   const idToken = authorization.split("Bearer ")[1];
   try {
-    const decodedToken = await auth.verifyIdToken(idToken);
-    if (decodedToken.admin !== true) {
-      logger.warn(`User ${decodedToken.uid} attempted access without admin claim`);
-      return false;
-    }
+    await auth.verifyIdToken(idToken);
     return true;
   } catch (error) {
     logger.error("Auth validation failed", error);

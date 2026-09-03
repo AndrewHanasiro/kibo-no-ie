@@ -16,14 +16,22 @@ export default function CreateProductModal(props: CreateProductModalProps) {
   const [price, setPrice] = useState(0);
   const [shopId, setShopId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { shops } = useShops();
 
   const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      if (!auth.currentUser) {
+        setErrorMessage("Sessão expirada. Por favor, faça login novamente.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const token = await auth.currentUser.getIdToken(true);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/createProduct`,
         {
@@ -45,9 +53,21 @@ export default function CreateProductModal(props: CreateProductModalProps) {
       if (response.ok) {
         props.setIsModalOpen(false);
         props.fetchProdutos();
+      } else {
+        if (response.status === 401) {
+          setErrorMessage(
+            "Permissão negada (401). Sua sessão expirou ou o token é inválido. Tente fazer logout e login novamente.",
+          );
+        } else {
+          const errorText = await response.text().catch(() => "");
+          setErrorMessage(
+            errorText || `Erro ao criar produto (Status: ${response.status})`,
+          );
+        }
       }
     } catch (error) {
       console.error("Creation failed:", error);
+      setErrorMessage("Erro de comunicação com o servidor. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -70,6 +90,13 @@ export default function CreateProductModal(props: CreateProductModalProps) {
             ✕
           </button>
         </div>
+
+        {errorMessage && (
+          <div className="mb-4 p-3 text-xs text-[#d32f2f] bg-[#fef2f2] rounded-xl border border-[#fecaca] flex items-start gap-2 font-medium">
+            <span className="text-base leading-none">⚠️</span>
+            <span className="flex-1">{errorMessage}</span>
+          </div>
+        )}
 
         <form onSubmit={handleCreate} className="space-y-4">
           <div>

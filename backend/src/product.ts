@@ -22,7 +22,11 @@ export const listProducts = onRequest({ cors: true }, async (request, response) 
     const snapshot = await db.ref("products").once("value");
     const data = snapshot.val() satisfies Record<string, Product>;
     
-    response.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    if (request.query.t || request.get("Cache-Control")?.includes("no-cache")) {
+      response.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    } else {
+      response.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    }
     
     if (!data) {
       response.status(200).json([]);
@@ -49,6 +53,10 @@ export const listProducts = onRequest({ cors: true }, async (request, response) 
  * Expects JSON: { "id": "123", "price": 29.99, "isAvailable": true }
  */
 export const updateProduct = onRequest({ cors: true }, async (request, response) => {
+  if (request.method === "OPTIONS") {
+    response.status(204).send();
+    return;
+  }
   const isAuthenticated = await validateAuth(request);
   if (!isAuthenticated) {
     response.status(401).send("Unauthorized");
@@ -58,15 +66,16 @@ export const updateProduct = onRequest({ cors: true }, async (request, response)
     response.status(405).send("Method Not Allowed");
     return;
   }
-  const { id, name, price, isAvailable, category, shopId } = request.body;
+  const body = typeof request.body === "string" ? JSON.parse(request.body) : request.body;
+  const { id, name, price, isAvailable, category, shopId } = body || {};
   if (!id) {
     response.status(400).send("Product ID is required");
     return;
   }
   try {
     const updates: Partial<Product> = {};
-    if (price !== undefined) updates.price = price;
-    if (isAvailable !== undefined) updates.isAvailable = isAvailable;
+    if (price !== undefined) updates.price = Number(price);
+    if (isAvailable !== undefined) updates.isAvailable = Boolean(isAvailable);
     if (name !== undefined) updates.name = name;
     if (category !== undefined) updates.category = category;
     if (shopId !== undefined) updates.shopId = shopId;

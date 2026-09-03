@@ -20,7 +20,14 @@ const useProducts = () => {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listProducts`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listProducts?t=${Date.now()}`,
+        {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
       );
 
       if (!response.ok) {

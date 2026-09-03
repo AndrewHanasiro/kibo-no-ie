@@ -3,12 +3,12 @@
 import React, { useState, useCallback } from "react";
 import { auth } from "../../../lib/firebase";
 import { Shop } from "@/hooks/shop";
-import { GoogleMap, useJsApiLoader, MarkerF } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from "@react-google-maps/api";
 import Image from "next/image";
 
 const containerStyle = {
   width: "100%",
-  height: "300px",
+  height: "320px",
   borderRadius: "0.75rem",
 };
 
@@ -22,18 +22,27 @@ type UpdateShopModalProps = {
 
 export default function UpdateShopModal(props: UpdateShopModalProps) {
   const [name, setName] = useState(props.selectedShop.name);
-  const [locations, setLocations] = useState<{latitude: number, longitude: number}[]>(
-    props.selectedShop.locations || []
-  );
+  const [locations, setLocations] = useState<{ latitude: number; longitude: number }[]>(() => {
+    if (Array.isArray(props.selectedShop.locations) && props.selectedShop.locations.length > 0) {
+      return props.selectedShop.locations;
+    }
+    const legacy = props.selectedShop as unknown as { latitude?: number; longitude?: number };
+    if (typeof legacy.latitude === "number" && typeof legacy.longitude === "number") {
+      return [{ latitude: legacy.latitude, longitude: legacy.longitude }];
+    }
+    return [];
+  });
   const [image, setImage] = useState<string>(props.selectedShop.image ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedMarkerIndex, setSelectedMarkerIndex] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
   });
 
-  const [, setMap] = useState<google.maps.Map | null>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,6 +58,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
   const handleUpdate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
       const token = await auth.currentUser?.getIdToken();
@@ -63,7 +73,7 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
           body: JSON.stringify({
             id: props.selectedShop.id,
             ...(props.selectedShop.name !== name && { name }),
-            locations: locations, // Always send locations to update
+            locations: locations, // Always send current locations to update/replace
             ...(props.selectedShop.image !== image && { image }),
           }),
         },
@@ -72,24 +82,68 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
       if (response.ok) {
         props.setIsModalOpen(false);
         props.fetchShop();
+      } else {
+        const errorText = await response.text();
+        setErrorMessage(errorText || "Ocorreu um erro ao atualizar a barraca.");
       }
     } catch (error) {
       console.error("Update failed:", error);
+      setErrorMessage("Erro de conexão ao atualizar a barraca.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // 1. Create location by clicking on map
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
-      setLocations((prev) => [...prev, { latitude: lat, longitude: lng }]);
+      setLocations((prev) => {
+        const next = [...prev, { latitude: lat, longitude: lng }];
+        setSelectedMarkerIndex(next.length - 1);
+        return next;
+      });
     }
   }, []);
 
+  // 2. Update location by dragging marker
+  const handleMarkerDragEnd = (index: number, e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      setLocations((prev) => {
+        const updated = [...prev];
+        updated[index] = { latitude: lat, longitude: lng };
+        return updated;
+      });
+    }
+  };
+
+  // 3. Delete location
   const handleRemoveLocation = (index: number) => {
     setLocations((prev) => prev.filter((_, i) => i !== index));
+    if (selectedMarkerIndex === index) {
+      setSelectedMarkerIndex(null);
+    } else if (selectedMarkerIndex !== null && selectedMarkerIndex > index) {
+      setSelectedMarkerIndex(selectedMarkerIndex - 1);
+    }
+  };
+
+  const handleClearAllLocations = () => {
+    if (confirm("Deseja realmente remover todas as localizações desta barraca?")) {
+      setLocations([]);
+      setSelectedMarkerIndex(null);
+    }
+  };
+
+  const handleFocusLocation = (index: number) => {
+    const loc = locations[index];
+    if (loc && map) {
+      map.panTo({ lat: loc.latitude, lng: loc.longitude });
+      map.setZoom(19);
+    }
+    setSelectedMarkerIndex(index);
   };
 
   const onLoad = useCallback(function callback(m: google.maps.Map) {
@@ -100,7 +154,10 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
     setMap(null);
   }, []);
 
-  const center = locations.length > 0 ? { lat: locations[0].latitude, lng: locations[0].longitude } : defaultCenter;
+  const center =
+    locations.length > 0
+      ? { lat: locations[0].latitude, lng: locations[0].longitude }
+      : defaultCenter;
 
   return (
     <div className="fixed inset-0 bg-[#1b261d]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -119,6 +176,12 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
             ✕
           </button>
         </div>
+
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
@@ -161,15 +224,27 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-[#1b261d]">
-                Localizações no Mapa
+                Localizações no Mapa ({locations.length})
               </label>
-              <span className="text-[11px] text-[#8cb83e] font-bold">
-                (Clique no mapa para adicionar pontos)
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-[#8cb83e] font-bold">
+                  Clique no mapa para criar • Arraste para mover
+                </span>
+                {locations.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleClearAllLocations}
+                    className="text-[11px] text-red-500 hover:text-red-700 font-semibold underline cursor-pointer"
+                  >
+                    Limpar todos
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="rounded-2xl overflow-hidden border border-[#d2dfd0] shadow-inner">
+
+            <div className="rounded-2xl overflow-hidden border border-[#d2dfd0] shadow-inner relative">
               {isLoaded ? (
                 <GoogleMap
                   mapContainerStyle={containerStyle}
@@ -184,30 +259,110 @@ export default function UpdateShopModal(props: UpdateShopModalProps) {
                   }}
                 >
                   {locations.map((loc, index) => (
-                    <MarkerF key={index} position={{ lat: loc.latitude, lng: loc.longitude }} />
+                    <MarkerF
+                      key={`${index}-${loc.latitude}-${loc.longitude}`}
+                      position={{ lat: loc.latitude, lng: loc.longitude }}
+                      draggable={true}
+                      onDragEnd={(e) => handleMarkerDragEnd(index, e)}
+                      onClick={() => setSelectedMarkerIndex(index)}
+                      label={{
+                        text: `${index + 1}`,
+                        color: "#ffffff",
+                        fontWeight: "bold",
+                        fontSize: "12px",
+                      }}
+                      title={`Ponto ${index + 1} - Arraste para reposicionar`}
+                    />
                   ))}
+
+                  {selectedMarkerIndex !== null && locations[selectedMarkerIndex] && (
+                    <InfoWindowF
+                      position={{
+                        lat: locations[selectedMarkerIndex].latitude,
+                        lng: locations[selectedMarkerIndex].longitude,
+                      }}
+                      onCloseClick={() => setSelectedMarkerIndex(null)}
+                    >
+                      <div className="p-1 min-w-[170px]">
+                        <div className="flex items-center gap-1 mb-1">
+                          <span className="font-bold text-[#1e4d2b] text-xs">
+                            📍 Ponto {selectedMarkerIndex + 1}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 font-mono mb-2">
+                          {locations[selectedMarkerIndex].latitude.toFixed(6)},{" "}
+                          {locations[selectedMarkerIndex].longitude.toFixed(6)}
+                        </p>
+                        <p className="text-[10px] text-gray-500 mb-2">
+                          💡 Arraste o marcador no mapa para ajustar a posição.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLocation(selectedMarkerIndex)}
+                          className="w-full py-1 px-2 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold transition-colors cursor-pointer border border-red-200"
+                        >
+                          🗑️ Excluir ponto
+                        </button>
+                      </div>
+                    </InfoWindowF>
+                  )}
                 </GoogleMap>
               ) : (
-                <div className="h-[250px] bg-[#f8faf7] flex items-center justify-center text-[#566755] text-sm">
+                <div className="h-[320px] bg-[#f8faf7] flex items-center justify-center text-[#566755] text-sm">
                   Carregando mapa...
                 </div>
               )}
             </div>
-            {locations.length > 0 && (
-              <div className="mt-2 space-y-1 max-h-24 overflow-y-auto">
-                {locations.map((loc, index) => (
-                  <div key={index} className="flex justify-between items-center bg-[#f8faf7] p-2 rounded-lg border border-[#e1ebe0]">
-                    <p className="text-xs text-[#7b8e79] font-medium">
-                      <span>📍 Ponto {index + 1}:</span>
-                      <span className="font-bold text-[#1e4d2b] ml-1">{loc.latitude.toFixed(6)}, {loc.longitude.toFixed(6)}</span>
-                    </p>
-                    <button type="button" onClick={() => handleRemoveLocation(index)} className="text-red-500 hover:text-red-700 text-xs font-bold">
-                      Remover
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+
+            {/* List of locations */}
+            <div className="mt-2.5">
+              {locations.length === 0 ? (
+                <div className="p-3 bg-[#f8faf7] border border-dashed border-[#d2dfd0] rounded-xl text-center">
+                  <p className="text-xs text-[#566755]">
+                    Nenhuma localização cadastrada. Clique no mapa acima para adicionar o primeiro ponto.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {locations.map((loc, index) => {
+                    const isSelected = selectedMarkerIndex === index;
+                    return (
+                      <div
+                        key={index}
+                        className={`flex justify-between items-center px-3 py-2 rounded-xl border transition-all ${
+                          isSelected
+                            ? "bg-[#eff7e1] border-[#8cb83e] shadow-sm"
+                            : "bg-[#f8faf7] hover:bg-[#f1f5ef] border-[#e1ebe0]"
+                        }`}
+                      >
+                        <div
+                          className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                          onClick={() => handleFocusLocation(index)}
+                          title="Clique para focar no mapa"
+                        >
+                          <span className="w-5 h-5 rounded-full bg-[#1e4d2b] text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
+                            {index + 1}
+                          </span>
+                          <span className="text-xs text-[#1b261d] font-mono truncate">
+                            {loc.latitude.toFixed(6)}, {loc.longitude.toFixed(6)}
+                          </span>
+                          <span className="text-[10px] text-[#8cb83e] font-semibold hidden sm:inline">
+                            (focar)
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLocation(index)}
+                          className="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex-shrink-0 ml-2"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
