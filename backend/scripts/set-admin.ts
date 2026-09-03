@@ -61,7 +61,7 @@ Exemplos:
     console.log("   do token) para que a alteração tenha efeito.");
     console.log("--------------------------------------------------");
     process.exit(0);
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Erro ao atualizar privilégios do usuário:", error.message || error);
     process.exit(1);
   }
