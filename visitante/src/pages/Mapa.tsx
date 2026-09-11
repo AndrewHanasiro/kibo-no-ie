@@ -38,9 +38,9 @@ const mapOptions = {
   maxZoom: 20,
   restriction: {
     latLngBounds: {
-      south: -23.4365,
+      south: -23.4373,
       west: -46.3595,
-      north: -23.4335,
+      north: -23.4339,
       east: -46.3565,
     },
     strictBounds: true,
