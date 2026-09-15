@@ -1,6 +1,6 @@
 import * as logger from "firebase-functions/logger";
 import { onRequest } from "firebase-functions/https";
-import { uploadToStorage, validateAuth } from "./helper";
+import { uploadToStorage, deleteFromStorage, validateAuth } from "./helper";
 import { getDatabase } from "firebase-admin/database";
 
 const db = getDatabase();
@@ -127,3 +127,61 @@ export const createShop = onRequest(
     }
   },
 );
+
+/**
+ * 4. Delete Shop
+ * Removes a shop by ID, deletes its image from storage, and unlinks associated products.
+ */
+export const deleteShop = onRequest(
+  { cors: true },
+  async (request, response) => {
+    if (request.method === "OPTIONS") {
+      response.status(204).send();
+      return;
+    }
+    const isAuthenticated = await validateAuth(request);
+    if (!isAuthenticated) {
+      response.status(401).send("Unauthorized");
+      return;
+    }
+    if (request.method !== "DELETE") {
+      response.status(405).send("Method Not Allowed");
+      return;
+    }
+
+    const body = typeof request.body === "string" ? JSON.parse(request.body) : request.body;
+    const id = request.query.id || body?.id;
+
+    if (!id || typeof id !== "string") {
+      response.status(400).send("Shop ID is required");
+      return;
+    }
+
+    try {
+      const shopSnapshot = await db.ref(`shops/${id}`).once("value");
+      const shopData = shopSnapshot.val() as Shop | null;
+
+      if (shopData?.image) {
+        await deleteFromStorage(shopData.image);
+      }
+
+      // Unlink products associated with this shop
+      const productsSnapshot = await db.ref("products").orderByChild("shopId").equalTo(id).once("value");
+      const productsData = productsSnapshot.val();
+      if (productsData) {
+        const updates: Record<string, null> = {};
+        Object.keys(productsData).forEach((prodId) => {
+          updates[`products/${prodId}/shopId`] = null;
+        });
+        await db.ref().update(updates);
+      }
+
+      await db.ref(`shops/${id}`).remove();
+      response.status(200).send(`Shop ${id} deleted successfully`);
+    } catch (error) {
+      logger.error("Error deleting shop", error);
+      response.status(500).send("Internal Server Error");
+    }
+  },
+);
+

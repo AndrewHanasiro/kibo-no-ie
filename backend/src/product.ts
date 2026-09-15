@@ -130,6 +130,42 @@ export const createProduct = onRequest({ cors: true }, async (request, response)
   }
 });
 
+/**
+ * 4. Delete Product
+ * Removes a product by ID.
+ */
+export const deleteProduct = onRequest({ cors: true }, async (request, response) => {
+  if (request.method === "OPTIONS") {
+    response.status(204).send();
+    return;
+  }
+  const isAuthenticated = await validateAuth(request);
+  if (!isAuthenticated) {
+    response.status(401).send("Unauthorized");
+    return;
+  }
+  if (request.method !== "DELETE") {
+    response.status(405).send("Method Not Allowed");
+    return;
+  }
+
+  const body = typeof request.body === "string" ? JSON.parse(request.body) : request.body;
+  const id = request.query.id || body?.id;
+
+  if (!id || typeof id !== "string") {
+    response.status(400).send("Product ID is required");
+    return;
+  }
+
+  try {
+    await db.ref(`products/${id}`).remove();
+    response.status(200).send(`Product ${id} deleted successfully`);
+  } catch (error) {
+    logger.error("Error deleting product", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+
 import { onValueUpdated } from "firebase-functions/v2/database";
 
 /**

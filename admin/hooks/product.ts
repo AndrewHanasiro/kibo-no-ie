@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { auth } from "@/lib/firebase";
 
 export type Product = {
   id: string;
@@ -44,6 +45,32 @@ const useProducts = () => {
     }
   }, []);
 
+  const deleteProduct = async (id: string) => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/deleteProduct`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id }),
+        }
+      );
+
+      if (response.ok) {
+        await fetchProdutos();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Delete product failed:", err);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       await fetchProdutos();
@@ -51,7 +78,8 @@ const useProducts = () => {
     load();
   }, [fetchProdutos]);
 
-  return { products, loading, error, refetch: fetchProdutos };
+  return { products, loading, error, refetch: fetchProdutos, deleteProduct };
 };
 
 export default useProducts;
+

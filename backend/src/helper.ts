@@ -52,3 +52,17 @@ export const uploadToStorage = async (image: string): Promise<string> => {
   await file.save(imageBuffer, { metadata: { contentType }, public: true });
   return `https://storage.googleapis.com/${bucket.name}/${file.name}`;
 };
+
+export const deleteFromStorage = async (imageUrl: string): Promise<void> => {
+  try {
+    const prefix = `https://storage.googleapis.com/${bucket.name}/`;
+    if (imageUrl && imageUrl.startsWith(prefix)) {
+      const filePath = imageUrl.replace(prefix, "");
+      if (filePath) {
+        await bucket.file(filePath).delete({ ignoreNotFound: true });
+      }
+    }
+  } catch (error) {
+    logger.error("Failed to delete file from storage", error);
+  }
+};

@@ -11,8 +11,20 @@ export default function ProdutosPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const { products, loading, refetch } = useProducts();
+  const { products, loading, refetch, deleteProduct } = useProducts();
+
+  const handleDelete = async (product: Product) => {
+    if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
+      setDeletingId(product.id);
+      try {
+        await deleteProduct(product.id);
+      } finally {
+        setDeletingId(null);
+      }
+    }
+  };
 
   const categoryList = useMemo(() => {
     return Array.from(new Set(products.map((product) => product.category))).sort((a, b) => a.localeCompare(b));
@@ -173,15 +185,43 @@ export default function ProdutosPage() {
                           R$ {p.price.toFixed(2)}
                         </span>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSelectedProduct(p);
-                          setIsModalOpen(true);
-                        }}
-                        className="px-3.5 py-2 text-xs font-bold bg-[#f5f8f2] hover:bg-[#8cb83e] text-[#1e4d2b] hover:text-[#13301a] border border-[#d2dfd0] rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap"
-                      >
-                        Editar ✏️
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedProduct(p);
+                            setIsModalOpen(true);
+                          }}
+                          className="px-3.5 py-2 text-xs font-bold bg-[#f5f8f2] hover:bg-[#8cb83e] text-[#1e4d2b] hover:text-[#13301a] border border-[#d2dfd0] rounded-xl transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                        >
+                          Editar ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p)}
+                          disabled={deletingId === p.id}
+                          className="p-2 text-[#ef4444] hover:text-white hover:bg-[#ef4444] bg-[#fdf2f2] border border-[#ef4444]/30 rounded-xl transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                          title="Excluir produto"
+                          aria-label={`Excluir ${p.name}`}
+                        >
+                          {deletingId === p.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
