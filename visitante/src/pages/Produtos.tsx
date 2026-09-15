@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Utensils, ChevronLeft, WifiOff, Plus, Minus, Calculator, X, Trash2, Info } from 'lucide-react';
+import { Utensils, ChevronLeft, ChevronRight, WifiOff, Plus, Minus, Calculator, X, Trash2, Info } from 'lucide-react';
 import type { Product } from '../types/product';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -14,6 +14,45 @@ export default function Produtos() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isCalculatorMode, setIsCalculatorMode] = useState<boolean>(false);
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = categoriesRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 6);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 6);
+  }, []);
+
+  useEffect(() => {
+    // Pequeno delay para garantir cálculo correto do scrollWidth após renderização dos chips
+    const timer = setTimeout(checkScroll, 100);
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [categories, checkScroll]);
+
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (categoriesRef.current) {
+      categoriesRef.current.scrollBy({
+        left: direction === 'left' ? -160 : 160,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleCategorySelect = (category: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    setSelectedCategory(category);
+    e.currentTarget.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    });
+  };
 
   // Não precisamos de state para o valor total, calculamos de forma derivada para evitar bugs no setState duplo do React Strict Mode
   const totalValue = useMemo(() => {
@@ -142,26 +181,58 @@ export default function Produtos() {
           </div>
         ) : (
           <>
-            {/* Horizontal Category Chips */}
+            {/* Horizontal Category Chips com sinalizador visual de scroll */}
             {categories.length > 0 && (
-              <div className="flex-shrink-0 w-full overflow-x-auto no-scrollbar py-3 px-4 shadow-sm bg-kibo-bg sticky top-0 z-10">
-                <div className="flex gap-2">
-                  {categories.map((category) => {
-                    const isSelected = selectedCategory === category;
-                    return (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors whitespace-nowrap ${isSelected
-                            ? 'bg-white border-secondary-leaf text-[#13301A] font-bold shadow-sm'
-                            : 'bg-white border-[#E1EBE0] text-[#566755] hover:bg-gray-50'
-                          }`}
-                      >
-                        {category}
-                      </button>
-                    );
-                  })}
+              <div className="relative sticky top-0 z-10 bg-kibo-bg shadow-sm">
+                {/* Indicador de rolagem para a esquerda */}
+                {canScrollLeft && (
+                  <button
+                    onClick={() => scrollCategories('left')}
+                    aria-label="Ver categorias anteriores"
+                    className="absolute left-0 top-0 bottom-0 z-20 w-12 bg-gradient-to-r from-kibo-bg via-kibo-bg/90 to-transparent flex items-center justify-start pl-2 text-primary-forest cursor-pointer"
+                  >
+                    <div className="bg-white/95 shadow-sm border border-[#E1EBE0] rounded-full p-1 text-primary-forest hover:bg-white flex items-center justify-center transition-transform hover:scale-105 active:scale-95">
+                      <ChevronLeft size={16} />
+                    </div>
+                  </button>
+                )}
+
+                <div
+                  ref={categoriesRef}
+                  onScroll={checkScroll}
+                  className="flex-shrink-0 w-full overflow-x-auto no-scrollbar py-3 px-4"
+                >
+                  <div className="flex gap-2 pr-6">
+                    {categories.map((category) => {
+                      const isSelected = selectedCategory === category;
+                      return (
+                        <button
+                          key={category}
+                          onClick={(e) => handleCategorySelect(category, e)}
+                          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors whitespace-nowrap cursor-pointer ${isSelected
+                              ? 'bg-white border-secondary-leaf text-[#13301A] font-bold shadow-sm'
+                              : 'bg-white border-[#E1EBE0] text-[#566755] hover:bg-gray-50'
+                            }`}
+                        >
+                          {category}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {/* Indicador de rolagem para a direita */}
+                {canScrollRight && (
+                  <button
+                    onClick={() => scrollCategories('right')}
+                    aria-label="Ver mais categorias"
+                    className="absolute right-0 top-0 bottom-0 z-20 w-14 bg-gradient-to-l from-kibo-bg via-kibo-bg/95 to-transparent flex items-center justify-end pr-2 text-primary-forest cursor-pointer"
+                  >
+                    <div className="bg-white/95 shadow-sm border border-[#E1EBE0] rounded-full p-1 text-primary-forest hover:bg-white flex items-center justify-center transition-transform hover:scale-105 active:scale-95 animate-pulse">
+                      <ChevronRight size={16} />
+                    </div>
+                  </button>
+                )}
               </div>
             )}
 
