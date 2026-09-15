@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Utensils, ChevronLeft, ChevronRight, WifiOff, Plus, Minus, Calculator, X, Trash2, Info } from 'lucide-react';
 import type { Product } from '../types/product';
+import PriceDisclaimer from '../components/PriceDisclaimer';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const MOCK_URL = 'https://listproducts-veumhwpskq-uc.a.run.app';
@@ -235,6 +236,9 @@ export default function Produtos() {
                 )}
               </div>
             )}
+
+            {/* Aviso informativo de preços sujeitos a alteração (controlado por feature flag) */}
+            <PriceDisclaimer />
 
             {/* Banner explicativo quando o Modo Calculadora está ativo */}
             {isCalculatorMode && (
