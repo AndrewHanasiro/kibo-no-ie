@@ -73,26 +73,26 @@ export default function Avisos() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto flex flex-col p-4 space-y-3">
+      <main className="flex-1 overflow-y-auto p-4">
         {isLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+          <div className="h-full flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh]">
             <div className="w-10 h-10 border-4 border-secondary-leaf border-t-transparent rounded-full animate-spin"></div>
             <p className="text-[#566755] text-sm font-medium">Carregando avisos...</p>
           </div>
         ) : error ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4 text-center">
+          <div className="h-full flex flex-col items-center justify-center p-8 space-y-4 text-center min-h-[60vh]">
             <AlertCircle size={48} className="text-red-500" />
             <p className="text-[#566755] text-sm">{error}</p>
             <button 
               onClick={fetchWarnings}
-              className="mt-2 flex items-center gap-2 bg-primary-forest text-white px-4 py-2 rounded-xl font-medium hover:bg-opacity-90 transition shadow-sm"
+              className="mt-2 flex items-center gap-2 bg-primary-forest text-white px-4 py-2 rounded-xl font-medium hover:bg-opacity-90 transition shadow-sm cursor-pointer"
             >
               <RefreshCw size={18} />
               Atualizar
             </button>
           </div>
         ) : warnings.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-4 min-h-[60vh]">
             <MessageSquareWarning size={56} className="text-secondary-leaf" />
             <h2 className="text-lg font-bold text-[#1B261D]">Nenhum comunicado no momento</h2>
             <p className="text-[#566755] text-sm">
@@ -100,40 +100,41 @@ export default function Avisos() {
             </p>
           </div>
         ) : (
-          warnings.map((warning, index) => (
-            <div 
-              key={warning.id} 
-              className="bg-white rounded-[18px] border border-[#E1EBE0] shadow-sm flex overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300"
-              style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
-            >
-              {/* Left Color Bar */}
-              <div className={`w-1.5 flex-shrink-0 ${index === 0 ? 'bg-secondary-leaf' : 'bg-primary-forest'}`}></div>
-              
-              <div className="p-4 flex gap-3.5 w-full">
-                <div className="bg-[#EFF7E1] p-2 rounded-xl h-fit">
-                  <Megaphone size={20} className="text-primary-forest" />
-                </div>
+          <div className="flex flex-col gap-3">
+            {warnings.map((warning, index) => (
+              <div 
+                key={warning.id} 
+                className="bg-white rounded-[18px] border border-[#E1EBE0] shadow-sm flex shrink-0 overflow-hidden"
+              >
+                {/* Left Color Bar */}
+                <div className={`w-1.5 shrink-0 ${index === 0 ? 'bg-secondary-leaf' : 'bg-primary-forest'}`}></div>
                 
-                <div className="flex-1 flex flex-col">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-bold text-primary-forest leading-tight">Aviso Oficial</span>
-                      <span className="text-[10px] text-[#566755] mt-0.5">{formatDate(warning.timestamp)}</span>
-                    </div>
-                    {index === 0 && (
-                      <div className="bg-secondary-leaf px-1.5 py-0.5 rounded-md">
-                        <span className="text-[9px] font-bold text-[#13301A] uppercase tracking-wider">Recente</span>
-                      </div>
-                    )}
+                <div className="p-4 flex gap-3.5 flex-1 min-w-0">
+                  <div className="bg-[#EFF7E1] p-2 rounded-xl h-fit shrink-0">
+                    <Megaphone size={20} className="text-primary-forest" />
                   </div>
                   
-                  <p className="text-sm font-medium text-[#1B261D] mt-2 leading-relaxed">
-                    {warning.text}
-                  </p>
+                  <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-bold text-primary-forest leading-tight">Aviso Oficial</span>
+                        <span className="text-[10px] text-[#566755] mt-0.5">{formatDate(warning.timestamp)}</span>
+                      </div>
+                      {index === 0 && (
+                        <div className="bg-secondary-leaf px-1.5 py-0.5 rounded-md shrink-0">
+                          <span className="text-[9px] font-bold text-[#13301A] uppercase tracking-wider">Recente</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <p className="text-sm font-medium text-[#1B261D] mt-2 leading-relaxed break-words">
+                      {warning.text}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </main>
     </div>
