@@ -23,6 +23,12 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { shops } = useShops();
 
+  const sortedShops = React.useMemo(() => {
+    return [...(shops || [])].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+    );
+  }, [shops]);
+
   const handleUpdate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -126,7 +132,7 @@ export default function UpdateProductModal(props: UpdateProductModalProps) {
               onChange={(e) => setShopId(e.target.value)}
             >
               <option value="">Selecione uma barraca</option>
-              {shops?.map((shop) => (
+              {sortedShops.map((shop) => (
                 <option key={shop.id} value={shop.id}>
                   {shop.name}
                 </option>

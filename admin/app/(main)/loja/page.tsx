@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import UpdateShopModal from "./_updateModal";
 import CreateShopModal from "./_createModal";
@@ -13,6 +13,12 @@ export default function LojasPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { shops, loading, refetch, deleteShop } = useShops();
+
+  const sortedShops = useMemo(() => {
+    return [...(shops || [])].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+    );
+  }, [shops]);
 
   const handleDelete = async (shop: Shop) => {
     if (confirm(`Tem certeza que deseja excluir a barraca "${shop.name}"?`)) {
@@ -68,7 +74,7 @@ export default function LojasPage() {
       {/* Shop Cards Grid */}
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {shops?.map((p) => (
+          {sortedShops.map((p) => (
             <div
               key={p.id}
               className="p-5 bg-white border border-[#e1ebe0] rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center justify-between gap-4 group hover:border-[#8cb83e]/50"

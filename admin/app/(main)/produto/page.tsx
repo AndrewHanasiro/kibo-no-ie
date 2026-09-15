@@ -27,7 +27,9 @@ export default function ProdutosPage() {
   };
 
   const categoryList = useMemo(() => {
-    return Array.from(new Set(products.map((product) => product.category))).sort((a, b) => a.localeCompare(b));
+    return Array.from(new Set(products.map((product) => product.category))).sort((a, b) =>
+      a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+    );
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -39,7 +41,9 @@ export default function ProdutosPage() {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(lowerQuery));
     }
-    return [...result].sort((a, b) => a.name.localeCompare(b.name));
+    return [...result].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+    );
   }, [products, activeCategoryFilter, searchQuery]);
 
   const groupedList = useMemo(() => {
@@ -140,8 +144,12 @@ export default function ProdutosPage() {
       {!loading && (
         <div className="space-y-8">
           {Object.entries(groupedList)
-            .sort(([catA], [catB]) => catA.localeCompare(catB))
-            .map(([category, categoryProducts]) => (
+            .sort(([catA], [catB]) => catA.localeCompare(catB, "pt-BR", { sensitivity: "base" }))
+            .map(([category, categoryProducts]) => {
+              const sortedCategoryProducts = (categoryProducts || []).slice().sort((a, b) =>
+                a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" })
+              );
+              return (
             <section key={category} className="space-y-4">
               <div className="flex items-center gap-3">
                 <span className="px-3 py-1 bg-[#eff7e1] text-[#1e4d2b] font-extrabold text-sm rounded-xl border border-[#8cb83e]/30">
@@ -149,12 +157,12 @@ export default function ProdutosPage() {
                 </span>
                 <div className="h-px bg-[#e1ebe0] flex-1" />
                 <span className="text-xs text-[#7b8e79] font-medium">
-                  {categoryProducts?.length} {categoryProducts?.length === 1 ? "item" : "itens"}
+                  {sortedCategoryProducts.length} {sortedCategoryProducts.length === 1 ? "item" : "itens"}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoryProducts?.map((p) => (
+                {sortedCategoryProducts.map((p) => (
                   <div
                     key={p.id}
                     className="p-5 bg-white border border-[#e1ebe0] rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:border-[#8cb83e]/50"
@@ -227,7 +235,8 @@ export default function ProdutosPage() {
                 ))}
               </div>
             </section>
-          ))}
+              );
+            })}
         </div>
       )}
 

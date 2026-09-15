@@ -37,8 +37,10 @@ export default function Produtos() {
 
       setAllProducts(products);
 
-      // Extrair categorias únicas
-      const uniqueCategories = Array.from(new Set(products.map(p => p.category)));
+      // Extrair categorias únicas em ordem alfabética
+      const uniqueCategories = Array.from(new Set(products.map(p => p.category))).sort((a, b) =>
+        a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+      );
       setCategories(['Todos', ...uniqueCategories]);
 
     } catch (err: any) {
@@ -87,8 +89,13 @@ export default function Produtos() {
   }, [allProducts]);
 
   const displayedProducts = useMemo(() => {
-    if (selectedCategory === 'Todos') return allProducts;
-    return allProducts.filter(p => p.category === selectedCategory);
+    const list = selectedCategory === 'Todos'
+      ? allProducts
+      : allProducts.filter(p => p.category === selectedCategory);
+
+    return [...list].sort((a, b) =>
+      a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+    );
   }, [allProducts, selectedCategory]);
 
   return (
