@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true
+        enabled: false
       },
       includeAssets: ['favicon.jpg', 'icons.svg'],
       manifest: {
@@ -34,17 +34,20 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
-            // Endpoints da API (listProducts, listShop, listWarning e Cloud Functions)
+            // Endpoints da API (listProducts e listShop)
+            // listWarning NÃO deve ser cacheado pelo Service Worker pois são avisos dinâmicos em tempo real
             urlPattern: ({ url }) => {
               const pathname = url.pathname.toLowerCase();
               return pathname.includes('listproducts') ||
-                     pathname.includes('listshop') ||
-                     pathname.includes('listwarning');
+                     pathname.includes('listshop');
             },
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-data-cache',
               networkTimeoutSeconds: 3,
+              matchOptions: {
+                ignoreSearch: true
+              },
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 24 * 60 * 60 // 24 horas

@@ -64,7 +64,13 @@ export default function Produtos() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(apiUrl);
+      const response = await fetch(`${apiUrl}?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
       if (!response.ok) {
         throw new Error(`Erro: ${response.status} - ${response.statusText}`);
       }

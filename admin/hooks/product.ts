@@ -61,12 +61,62 @@ const useProducts = () => {
       );
 
       if (response.ok) {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
         await fetchProdutos();
         return true;
       }
       return false;
     } catch (err) {
       console.error("Delete product failed:", err);
+      return false;
+    }
+  };
+
+  const resetProductsAvailability = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/resetProductsAvailability`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Se o endpoint retornar 404 (ex: backend ainda não reimplantado), faz fallback atualizando um a um
+      if (response.status === 404) {
+        const unavailableProducts = products.filter((p) => !p.isAvailable);
+        const updatePromises = unavailableProducts.map((p) =>
+          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/updateProduct`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ id: p.id, isAvailable: true }),
+          })
+        );
+        await Promise.all(updatePromises);
+        setProducts((prev) =>
+          prev.map((p) => ({ ...p, isAvailable: true }))
+        );
+        await fetchProdutos();
+        return true;
+      }
+
+      if (response.ok) {
+        setProducts((prev) =>
+          prev.map((p) => ({ ...p, isAvailable: true }))
+        );
+        await fetchProdutos();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Reset products availability failed:", err);
       return false;
     }
   };
@@ -78,7 +128,7 @@ const useProducts = () => {
     load();
   }, [fetchProdutos]);
 
-  return { products, loading, error, refetch: fetchProdutos, deleteProduct };
+  return { products, loading, error, refetch: fetchProdutos, deleteProduct, resetProductsAvailability };
 };
 
 export default useProducts;

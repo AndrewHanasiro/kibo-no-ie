@@ -20,7 +20,7 @@ export const listWarning = onRequest({ cors: true }, async (request, response) =
     const snapshot = await db.ref("warnings").once("value");
     const data = snapshot.val() satisfies Record<string, Warning>;
 
-    response.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    response.set("Cache-Control", "no-store, no-cache, must-revalidate");
 
     if (!data) {
       response.status(200).json([]);
@@ -144,3 +144,28 @@ export const deleteWarning = onRequest({ cors: true }, async (request, response)
     response.status(500).send("Internal Server Error");
   }
 });
+
+/**
+ * 7. Delete All Warnings
+ * Removes all warnings from the database.
+ */
+export const deleteAllWarnings = onRequest({ cors: true }, async (request, response) => {
+  const isAuthenticated = await validateAuth(request);
+  if (!isAuthenticated) {
+    response.status(401).send("Unauthorized");
+    return;
+  }
+  if (request.method !== "DELETE") {
+    response.status(405).send("Method Not Allowed");
+    return;
+  }
+
+  try {
+    await db.ref("warnings").remove();
+    response.status(200).send("All warnings deleted successfully");
+  } catch (error) {
+    logger.error("Error deleting all warnings", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+

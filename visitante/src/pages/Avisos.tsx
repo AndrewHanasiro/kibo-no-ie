@@ -16,7 +16,30 @@ export default function Avisos() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(apiUrl);
+      if ('caches' in window) {
+        try {
+          const cacheKeys = await caches.keys();
+          for (const key of cacheKeys) {
+            const cache = await caches.open(key);
+            const reqs = await cache.keys();
+            for (const req of reqs) {
+              if (req.url.toLowerCase().includes('listwarning')) {
+                await cache.delete(req);
+              }
+            }
+          }
+        } catch {
+          // ignore cache storage errors
+        }
+      }
+
+      const response = await fetch(`${apiUrl}?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
       if (!response.ok) {
         throw new Error(`Erro: ${response.status} - ${response.statusText}`);
       }
@@ -69,6 +92,14 @@ export default function Avisos() {
               <span className="text-[#C5E1B8] text-xs font-medium">Comunicados e Recados da Organização</span>
             </div>
           </div>
+          <button
+            onClick={() => fetchWarnings()}
+            disabled={isLoading}
+            aria-label="Atualizar avisos"
+            className="p-2 rounded-full hover:bg-white/10 transition-colors text-white disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw size={20} className={isLoading ? "animate-spin" : ""} />
+          </button>
         </div>
       </header>
 

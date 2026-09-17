@@ -4,9 +4,10 @@ import { useState } from "react";
 import useWarnings from "@/hooks/warning";
 
 export default function AvisosPage() {
-  const { warnings, loading, createWarning, deleteWarning } = useWarnings();
+  const { warnings, loading, createWarning, deleteWarning, deleteAllWarnings } = useWarnings();
   const [newWarningText, setNewWarningText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +27,19 @@ export default function AvisosPage() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (warnings.length === 0) return;
+    if (
+      confirm(
+        `Tem certeza que deseja apagar TODOS os ${warnings.length} aviso(s)? Esta ação não pode ser desfeita.`
+      )
+    ) {
+      setIsDeletingAll(true);
+      await deleteAllWarnings();
+      setIsDeletingAll(false);
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* Header Banner */}
@@ -40,6 +54,29 @@ export default function AvisosPage() {
           <p className="text-sm text-[#566755]">
             Gerencie os avisos sobre os produtos e eventos.
           </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-[#f5f8f2] border border-[#e1ebe0] rounded-2xl">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8cb83e]" />
+            <span className="text-xs font-bold text-[#1e4d2b]">
+              {warnings.length} {warnings.length === 1 ? "Aviso" : "Avisos"}
+            </span>
+          </div>
+          {warnings.length > 0 && (
+            <button
+              onClick={handleDeleteAll}
+              disabled={isDeletingAll}
+              className="flex items-center gap-2 px-4 py-2 bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] hover:text-[#b91c1c] border border-[#fecaca] font-bold text-sm rounded-2xl transition-all shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDeletingAll ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#dc2626] border-t-transparent" />
+              ) : (
+                <span>🗑️</span>
+              )}
+              <span>{isDeletingAll ? "Apagando..." : "Apagar Todos"}</span>
+            </button>
+          )}
         </div>
       </div>
 

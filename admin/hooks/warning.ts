@@ -18,7 +18,14 @@ const useWarnings = () => {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listWarning`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listWarning?t=${Date.now()}`,
+        {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
       );
 
       if (!response.ok) {
@@ -51,7 +58,8 @@ const useWarnings = () => {
       );
 
       if (response.ok) {
-        fetchWarnings();
+        setWarnings((prev) => prev.filter((w) => w.id !== id));
+        await fetchWarnings();
         return true;
       }
       return false;
@@ -77,12 +85,56 @@ const useWarnings = () => {
       );
 
       if (response.ok) {
-        fetchWarnings();
+        await fetchWarnings();
         return true;
       }
       return false;
     } catch (error) {
       console.error("Create failed:", error);
+      return false;
+    }
+  };
+
+  const deleteAllWarnings = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/deleteAllWarnings`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Se o endpoint retornar 404 (ex: backend ainda não reimplantado), faz fallback deletando um a um
+      if (response.status === 404) {
+        const deletePromises = warnings.map((w) =>
+          fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/deleteWarning`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ id: w.id }),
+          })
+        );
+        await Promise.all(deletePromises);
+        setWarnings([]);
+        await fetchWarnings();
+        return true;
+      }
+
+      if (response.ok) {
+        setWarnings([]);
+        await fetchWarnings();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Delete all failed:", error);
       return false;
     }
   };
@@ -94,7 +146,7 @@ const useWarnings = () => {
     load();
   }, [fetchWarnings]);
 
-  return { warnings, loading, error, refetch: fetchWarnings, deleteWarning, createWarning };
+  return { warnings, loading, error, refetch: fetchWarnings, deleteWarning, deleteAllWarnings, createWarning };
 };
 
 export default useWarnings;

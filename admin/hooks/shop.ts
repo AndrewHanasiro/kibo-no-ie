@@ -23,7 +23,16 @@ const useShops = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/listShop`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listShop?t=${Date.now()}`,
+        {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -53,6 +62,7 @@ const useShops = () => {
       );
 
       if (response.ok) {
+        setShops((prev) => prev.filter((s) => s.id !== id));
         await fetchShops();
         return true;
       }

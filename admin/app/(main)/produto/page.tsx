@@ -12,19 +12,9 @@ export default function ProdutosPage() {
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
 
-  const { products, loading, refetch, deleteProduct } = useProducts();
-
-  const handleDelete = async (product: Product) => {
-    if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
-      setDeletingId(product.id);
-      try {
-        await deleteProduct(product.id);
-      } finally {
-        setDeletingId(null);
-      }
-    }
-  };
+  const { products, loading, refetch, deleteProduct, resetProductsAvailability } = useProducts();
 
   const categoryList = useMemo(() => {
     return Array.from(new Set(products.map((product) => product.category))).sort((a, b) =>
@@ -54,6 +44,35 @@ export default function ProdutosPage() {
     return products.filter((p) => p.isAvailable).length;
   }, [products]);
 
+  const handleResetAvailability = async () => {
+    const unavailableCount = products.filter((p) => !p.isAvailable).length;
+    if (unavailableCount === 0) return;
+
+    if (
+      confirm(
+        `Deseja marcar ${unavailableCount === 1 ? "o produto indisponível" : `todos os ${unavailableCount} produtos indisponíveis`} como disponível(is)?`
+      )
+    ) {
+      setIsResetting(true);
+      try {
+        await resetProductsAvailability();
+      } finally {
+        setIsResetting(false);
+      }
+    }
+  };
+
+  const handleDelete = async (product: Product) => {
+    if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
+      setDeletingId(product.id);
+      try {
+        await deleteProduct(product.id);
+      } finally {
+        setDeletingId(null);
+      }
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Banner */}
@@ -77,6 +96,19 @@ export default function ProdutosPage() {
               {totalAvailable} / {products.length} Disponíveis
             </span>
           </div>
+          <button
+            onClick={handleResetAvailability}
+            disabled={isResetting || totalAvailable === products.length || products.length === 0}
+            className="flex items-center gap-2 px-4 py-3 bg-white hover:bg-[#f5f8f2] text-[#1e4d2b] border border-[#8cb83e]/60 font-bold text-sm rounded-2xl transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            title={totalAvailable === products.length ? "Todos os produtos já estão disponíveis" : "Marcar todos os produtos como disponíveis"}
+          >
+            {isResetting ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#1e4d2b] border-t-transparent" />
+            ) : (
+              <span>🔄</span>
+            )}
+            <span>{isResetting ? "Resetando..." : "Resetar Disponibilidade"}</span>
+          </button>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 px-5 py-3 bg-[#1e4d2b] hover:bg-[#163d21] text-white font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer"

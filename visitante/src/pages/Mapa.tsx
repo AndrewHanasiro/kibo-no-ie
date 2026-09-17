@@ -124,7 +124,13 @@ function MapaInner() {
 
   const fetchShops = useCallback(async () => {
     try {
-      const res = await fetch(SHOP_URL);
+      const res = await fetch(`${SHOP_URL}?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setShops(data);
@@ -136,7 +142,13 @@ function MapaInner() {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const res = await fetch(PRODUCT_URL);
+      const res = await fetch(`${PRODUCT_URL}?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setProducts(data);

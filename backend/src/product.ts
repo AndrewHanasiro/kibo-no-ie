@@ -166,6 +166,51 @@ export const deleteProduct = onRequest({ cors: true }, async (request, response)
   }
 });
 
+/**
+ * 5. Reset Products Availability
+ * Sets isAvailable to true for all products that are currently unavailable.
+ */
+export const resetProductsAvailability = onRequest({ cors: true }, async (request, response) => {
+  if (request.method === "OPTIONS") {
+    response.status(204).send();
+    return;
+  }
+  const isAuthenticated = await validateAuth(request);
+  if (!isAuthenticated) {
+    response.status(401).send("Unauthorized");
+    return;
+  }
+  if (request.method !== "POST" && request.method !== "PATCH") {
+    response.status(405).send("Method Not Allowed");
+    return;
+  }
+
+  try {
+    const snapshot = await db.ref("products").once("value");
+    const data = snapshot.val() as Record<string, Product> | null;
+    if (!data) {
+      response.status(200).send("No products found");
+      return;
+    }
+
+    const updates: Record<string, boolean> = {};
+    for (const key of Object.keys(data)) {
+      if (!data[key].isAvailable) {
+        updates[`${key}/isAvailable`] = true;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await db.ref("products").update(updates);
+    }
+
+    response.status(200).send("Products availability reset successfully");
+  } catch (error) {
+    logger.error("Error resetting products availability", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+
 import { onValueUpdated } from "firebase-functions/v2/database";
 
 /**
