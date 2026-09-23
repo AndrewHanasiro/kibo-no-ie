@@ -13,7 +13,7 @@ export default defineConfig({
       devOptions: {
         enabled: false
       },
-      includeAssets: ['favicon.jpg', 'icons.svg'],
+      includeAssets: ['festival-logo.png', 'icons.svg'],
       manifest: {
         name: 'Kibô-no-Iê Visitante',
         short_name: 'Visitante',
@@ -23,7 +23,7 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: '/favicon.jpg',
+            src: '/festival-logo.png',
             sizes: '1024x1024',
             type: 'image/jpeg'
           }

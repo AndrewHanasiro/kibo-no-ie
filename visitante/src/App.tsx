@@ -4,6 +4,33 @@ import Produtos from './pages/Produtos';
 import Mapa from './pages/Mapa';
 import Avisos from './pages/Avisos';
 
+const MASTER_SPONSORS = [
+  { name: 'Aflord', src: '/master/aflord.PNG' },
+  { name: 'Comércio de Ferramentas Teruya', src: '/master/Comercio de Ferragentas Teruya.png' },
+  { name: 'Comércio de Frutas TH', src: '/master/Comércio de Frutas TH.png' },
+  { name: 'Gera Center', src: '/master/Gera Center.png' },
+  { name: 'Natural Art - Hortifruti', src: '/master/Natural Art - Hortifruti.png' },
+  { name: 'Pura Horta Verduras', src: '/master/Pura Horta Verduras.png' },
+  { name: 'Sacolão Saúde', src: '/master/Sacolão Saúde.png' },
+  { name: 'Sakura', src: '/master/Sakura.png' },
+  { name: 'SG Print', src: '/master/SG Print.png' },
+  { name: 'Via Verde Hortifruti', src: '/master/Via Verde Hortifruti.png' },
+];
+
+const DIAMANTE_SPONSORS = [
+  { name: 'Aoyama', src: '/diamante/Aoyama.png' },
+  { name: 'Horii Agro', src: '/diamante/Horii Agro.png' },
+  { name: 'Kamix', src: '/diamante/Kamix.png' },
+  { name: 'M. Camicado', src: '/diamante/M. Camicado.png' },
+  { name: 'Meifa', src: '/diamante/Meifa.png' },
+  { name: 'Merco Polímeros', src: '/diamante/Merco Polímeros.png' },
+  { name: 'Nipo Center', src: '/diamante/Nipo Center.png' },
+  { name: 'Polenghi', src: '/diamante/Polenghi.png' },
+  { name: 'Shibata Supermercados', src: '/diamante/Shibata Supermercados.png' },
+  { name: 'Smoti', src: '/diamante/Smoti.PNG' },
+  { name: 'Tin Zushi', src: '/diamante/Tin Zushi.png' },
+];
+
 function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-kibo-bg p-4 relative overflow-hidden">
@@ -57,31 +84,32 @@ function Home() {
         <div className="flex flex-col items-center justify-center mt-12 w-full text-[#566755]">
           
           <div className="w-full mb-8">
-            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Platinum</p>
-            <div className="flex justify-center items-center w-full">
-              <img src="/auth-plus-logo.png" alt="Sponsor Platinum" className="h-20 w-auto object-contain" />
-              <img src="/kibo-no-ie_logo.png" alt="Sponsor Platinum" className="h-20 w-auto object-contain" />
+            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Master</p>
+            <div className="flex flex-wrap justify-center items-center gap-y-6 w-full">
+              {MASTER_SPONSORS.map((sponsor) => (
+                <div key={sponsor.name} className="flex justify-center basis-1/2 px-3">
+                  <img
+                    src={sponsor.src}
+                    alt={sponsor.name}
+                    className="h-16 w-auto max-w-full object-contain"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="w-full">
-            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Master</p>
+            <p className="text-xs uppercase tracking-wider mb-4 font-semibold text-center text-secondary-leaf">Patrocínio Diamante</p>
             <div className="flex flex-wrap justify-center items-center gap-y-6 w-full">
-              <div className="flex justify-center basis-1/3 px-2">
-                <img src="/auth-plus-logo.png" alt="Sponsor Master 1" className="h-12 w-auto object-contain opacity-90" />
-              </div>
-              <div className="flex justify-center basis-1/3 px-2">
-                <img src="/auth-plus-logo.png" alt="Sponsor Master 2" className="h-12 w-auto object-contain opacity-90" />
-              </div>
-              <div className="flex justify-center basis-1/3 px-2">
-                <img src="/auth-plus-logo.png" alt="Sponsor Master 3" className="h-12 w-auto object-contain opacity-90" />
-              </div>
-              <div className="flex justify-center basis-1/3 px-2">
-                <img src="/auth-plus-logo.png" alt="Sponsor Master 4" className="h-12 w-auto object-contain opacity-90" />
-              </div>
-              <div className="flex justify-center basis-1/3 px-2">
-                <img src="/auth-plus-logo.png" alt="Sponsor Master 5" className="h-12 w-auto object-contain opacity-90" />
-              </div>
+              {DIAMANTE_SPONSORS.map((sponsor) => (
+                <div key={sponsor.name} className="flex justify-center basis-1/3 px-2">
+                  <img
+                    src={sponsor.src}
+                    alt={sponsor.name}
+                    className="h-12 w-auto object-contain opacity-90"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
